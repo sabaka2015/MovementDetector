@@ -1,28 +1,46 @@
 /* Author: Mateusz Osiński
- * The program is detecting movemets in film
+ * The program is detecting movements in video
  */
- #include <iostream>
- #include <opencv2/opencv.hpp>
+#include <time.h> 
  
- #include "FramesDifference.h"
- 
- using namespace std;
- using namespace cv;
- 
-void captureArm (int choice, string nameOfFile, VideoCapture *arm)
- {
+#include "FramesDifference.h"
+
+//this function gives an arm to the video. 
+//the function returns fps 
+//if we choose a live transmition, fps is counted- the get function do not work
+float captureArm (int choice, string nameOfFile, VideoCapture *arm)
+{
+	float fps;
 	if (choice==1)
 	{
 		*arm=VideoCapture(nameOfFile);
+		fps=arm->get(CV_CAP_PROP_FPS);
 	}
 	else
 	{
 		*arm=VideoCapture(0); //0- default camera
-	} 
- }
+		//start time
+		time_t start, end;
+		Mat lostFrames;
+		time(&start);
+		//grab 30 frames
+		for(int i = 0; i < 30; i++)
+		{
+			(*arm) >> lostFrames;
+		}
+		//end Time
+		time(&end);
+		//total time
+		double seconds = difftime (end, start);
+		// Calculate frames per second
+		cout<<seconds<<endl;
+		fps  = 30 / seconds;
+	}
+	return fps; 
+}
  
- int main ()
- {
+int main ()
+{
 	//capture the video
 	cout<<"Nagrany film: 1, na żywo: 0 : ";
 	short choice;
@@ -35,8 +53,9 @@ void captureArm (int choice, string nameOfFile, VideoCapture *arm)
 	}
 	
 	VideoCapture arm;
+	float fps; //frames per second
 	
-	captureArm(choice, nameOfFile/*"dlon.avi"*/, &arm);
+	fps=captureArm(choice, nameOfFile/*"dlon.avi"*/, &arm);
 
 	if (!arm.isOpened())
 	{
@@ -50,12 +69,8 @@ void captureArm (int choice, string nameOfFile, VideoCapture *arm)
 	cvtColor(olderFrame, olderFrameConv, CV_RGB2GRAY); //conversion from RGB to other color space- to save the memory
 	//to Luv-4B, to gray-4B, to XYZ-4B, to XSV-4B
 
-	//frames per second
-	float fps=25;//25;
-	//if(choice) fps = cvGetCaptureProperty(arm, CV_CAP_PROP_FPS);
-	//if(choice) fps=arm.get(CV_CAP_PROP_FPS);
-	cout << "klatki" << fps;
-	//distance between frames
+	cout << "klatki" << fps << endl;
+	//distance between frames in ms
 	double framesDistance = 1000 / fps;
 	//making a window
 	namedWindow("window", WINDOW_AUTOSIZE);
@@ -63,14 +78,17 @@ void captureArm (int choice, string nameOfFile, VideoCapture *arm)
 	{
 		if(!arm.grab()) break;
 		arm>>youngerFrame;
+		//conversion from RGB to Gray scale
 		cvtColor(youngerFrame, youngerFrameConv, CV_RGB2GRAY);
+		//object of the new class- difference between following frames
 		FramesDifference difference=FramesDifference(olderFrameConv, youngerFrameConv);
 		youngerFrameConv.copyTo(olderFrameConv);
+		imshow("window", difference.getDifference());
 		//alarm if time without movement is longer than 20s
+		cout<<endl<<(FramesDifference::counter*framesDistance)<<endl;
 		if (FramesDifference::counter*framesDistance>=20000)
 		{
-			FramesDifference::alarm(10000, 1000);
-			FramesDifference::counter=0;
+			FramesDifference::alarm();
 		}
 		
 		int stop = waitKey(framesDistance);
@@ -79,4 +97,4 @@ void captureArm (int choice, string nameOfFile, VideoCapture *arm)
 	
 	return 0;
 	 
- }
+}

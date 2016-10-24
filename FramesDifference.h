@@ -13,12 +13,11 @@ class FramesDifference
 	bool movement;
 	public:
 	static short counter;
-	FramesDifference(Mat old, Mat young);// {absdiff(old, young-100, difference);/*difference=old;*/};
-	//~FramesDifference(){/*cvReleaseImage(&difference);*/}
+	FramesDifference(Mat old, Mat young);
 	Mat getDifference(void) {return difference;};
 	void thresholding(Mat, Mat, double, double, int);
 	void movingPixels();
-	static void alarm(int, int);
+	static void alarm();
 	
 };
 #endif

@@ -25,4 +25,6 @@ FramesDifference.o: FramesDifference.cpp
 #		g++ $(CFLAGS) $(LIBS) -o program main.o
 #main.o: main.cpp
 #		g++ $(CFLAGS) $(LIBS) -o main.o -c main.cpp
-
+clean:
+		rm -f *.o
+.PHONY: clean
