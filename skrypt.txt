@@ -1,0 +1,2 @@
+set yrange [0:0.005]
+plot "proba1.txt" with linespoints pt 2 ps 2 lt 2 lw 1

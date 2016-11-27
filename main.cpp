@@ -2,6 +2,7 @@
  * The program is detecting movements in video
  */
 #include <time.h> 
+#include <cstdlib>
  
 #include "FramesDifference.h"
 
@@ -39,12 +40,14 @@ float captureArm (int choice, string nameOfFile, VideoCapture *arm)
 	return fps; 
 }
  
+
 int main ()
 {
 	//capture the video
 	cout<<"Nagrany film: 1, na żywo: 0 : ";
 	short choice;
 	cin>>choice;
+	
 	string nameOfFile;
 	if (choice==1)
 	{
@@ -62,10 +65,28 @@ int main ()
 		cout<<"brak pliku lub niewłaściwe nawiązanie połączenia z kamerą\n";
 		return -1;
 	}
+	cout<<"scenariusz:\nGauss: 1 \nMedian: 2\nBox: 3: \nDilat: 4 \nSobel: 5 ";
+	int scenario;
+	cin>>scenario;
+	cout<<"Czy zapisać film? : ";
+	bool record;
+	cin>>record;
+	string recordName="usunMnie.avi";
+	if (record)
+	{
+		cout<<"Podaj nazwę pliku docelowego (bez rozszerzenia): ";
+		cin>>recordName;
+		recordName+=".avi";
+	}
+	cout<<"Podaj nazwę pliku do zapisu danych (bez rozszerzenia): ";
+	string txtExport;
+	cin>>txtExport;
+	txtExport+=".txt";
 	
 	//read the first frame
 	Mat olderFrame, youngerFrame, olderFrameConv, youngerFrameConv;
 	arm>>olderFrame;
+	//olderFrame=imread("roznice/frodo2/nothres/dilat1/d00.bmp");
 	cvtColor(olderFrame, olderFrameConv, CV_RGB2GRAY); //conversion from RGB to other color space- to save the memory
 	//to Luv-4B, to gray-4B, to XYZ-4B, to XSV-4B
 
@@ -74,27 +95,90 @@ int main ()
 	double framesDistance = 1000 / fps;
 	//making a window
 	namedWindow("window", WINDOW_AUTOSIZE);
+	char zapis='1';
+	char zapis2='0';
+	
+	//zapis danych do pliku
+	//fstream file;
+	//file.open("oldvers.txt");
+	//int licznik=0;
+	
+	VideoWriter writer (/*"nagr_filmy/basic+gauss21x21_thres6_frodo2.avi"*/recordName, CV_FOURCC('M','J','P','G'), fps, Size(640,480), false);
+	
 	while (true)
 	{
+		//if(licznik>30) break;
+		//licznik++;
 		if(!arm.grab()) break;
 		arm>>youngerFrame;
+		//odczyt
+		#if 0
+		if (zapis2<='3')
+		{
+			string plik="roznice/frodo2/nothres/dilat1/d";
+			plik+=zapis2;//static_cast<char>(zapisanych);
+			plik+=zapis;
+			plik+=".bmp";
+			cout<<plik<<endl;
+			youngerFrame=imread(plik);
+			if (zapis<'9') zapis++;
+			else
+			{
+				zapis2++;
+				zapis='0';
+			}
+		}
+		#endif
 		//conversion from RGB to Gray scale
 		cvtColor(youngerFrame, youngerFrameConv, CV_RGB2GRAY);
+		//cvtColor(olderFrame, olderFrameConv, CV_RGB2GRAY);
 		//object of the new class- difference between following frames
-		FramesDifference difference=FramesDifference(olderFrameConv, youngerFrameConv);
+		FramesDifference difference=FramesDifference
+			(olderFrameConv, youngerFrameConv, scenario, txtExport);
+		//youngerFrame/*Conv*/.copyTo(olderFrame/*Conv*/);
 		youngerFrameConv.copyTo(olderFrameConv);
+		//cvtColor(olderFrame, olderFrameConv, CV_RGB2GRAY);
 		imshow("window", difference.getDifference());
+		if (record)
+			writer<<difference.getDifference();
+		//zapis
+		#if 0
+		if (zapis2<='9')
+		{
+			string plik="roznice/frodo2/thres8/frodo2_";
+			plik+=zapis2;//static_cast<char>(zapisanych);
+			plik+=zapis;
+			plik+=".jpg";
+			cout<<plik<<endl;
+			imwrite(plik, difference.getDifference()/*youngerFrame*/);
+			if (zapis<'9') zapis++;
+			else
+			{
+				zapis2++;
+				zapis='0';
+			}
+		}
+		#endif
 		//alarm if time without movement is longer than 20s
-		cout<<endl<<(FramesDifference::counter*framesDistance)<<endl;
-		if (FramesDifference::counter*framesDistance>=20000)
+		cout<<endl<<(FramesDifference::counterZero*framesDistance)<<endl;
+		if (FramesDifference::counterZero*framesDistance>=20000)
 		{
 			FramesDifference::alarm();
 		}
-		
+		FramesDifference::ElapsedTime+=(framesDistance/1000); //elapsed time
 		int stop = waitKey(framesDistance);
 		if (stop+1) break; //breaking with any key
 	}
-	
+	//file.close();
+	//cvReleaseVideoWriter(&writer);
+	//system("gnuplot -p -e \"plot 'basicThres15.txt'\"");
+	//making gnuplot script
+	ofstream skrypt("skrypt.txt");
+	skrypt << "set yrange [0:0.005]\n";
+	//skrypt << "set xrange [0:"<<(FramesDifference::ElapsedTime+0.1)<<"]\n";
+	skrypt << "plot \"" << txtExport <<"\" with linespoints pt 2 ps 2 lt 2 lw 1";
+	skrypt.close();
+	system("gnuplot -p -e \"load 'skrypt.txt'\"");
 	return 0;
 	 
 }
