@@ -65,7 +65,8 @@ int main ()
 		cout<<"brak pliku lub niewłaściwe nawiązanie połączenia z kamerą\n";
 		return -1;
 	}
-	cout<<"scenariusz:\nGauss: 1 \nMedian: 2\nBox: 3: \nDilat: 4 \nSobel: 5 ";
+	cout<<"scenariusz:\nGauss: 1 \nMedian: 2\nBox: 3: \nDilat: 4" 
+			"\nSobel: 5 \nThresBoxThres: 6 \nHistory: 7 \nWagi: 8 ";
 	int scenario;
 	cin>>scenario;
 	cout<<"Czy zapisać film? : ";

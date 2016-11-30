@@ -12,6 +12,7 @@ class FramesDifference
 {
 	Mat difference;
 	bool movement;
+	static Mat weights;
 	public:
 	static short counterZero;
 	static float ElapsedTime;
@@ -25,6 +26,12 @@ class FramesDifference
 	Mat BoxBlurScenario(Mat, Mat);
 	Mat DilatBlurScenario(Mat, Mat);
 	Mat SobelBlurScenario(Mat, Mat);
+	Mat ThresBoxThresScenario(Mat, Mat);
+	Mat HistoryScenario(Mat, Mat);
+	Mat WeightsScenario(Mat, Mat);
+	void Histogram(Mat, string);
+	Mat HistoryMatrix(Mat);
+	Mat WeightsMatrix(Mat);
 	
 };
 
