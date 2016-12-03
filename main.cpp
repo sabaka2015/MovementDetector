@@ -183,3 +183,7 @@ int main ()
 	return 0;
 	 
 }
+
+
+//uwagi:
+//zmienić colsWeights i rowsWeights na zwykłe tablice floatów

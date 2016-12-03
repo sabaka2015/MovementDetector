@@ -2,7 +2,8 @@
 
 short FramesDifference::counterZero=0;
 float FramesDifference::ElapsedTime=0;
-Mat FramesDifference::weights=Mat();
+//Mat FramesDifference::colsWeights=Mat();
+//Mat FramesDifference::rowsWeights=Mat();
 
 FramesDifference::FramesDifference(Mat old, Mat young, int scenario, string txtExport)
 {
@@ -55,9 +56,33 @@ FramesDifference::FramesDifference(Mat old, Mat young, int scenario, string txtE
 	movingPixels(txtExport);
 }
 
-void FramesDifference::thresholding(Mat inImage, Mat outImage, double thres, double maxval, int type)
+void FramesDifference::thresholding(Mat inImage, Mat outImage, short thres, double maxval, int type)
 {
 	threshold(inImage, outImage, thres, maxval, type);
+}
+
+void FramesDifference::thresholding(Mat inImage, Mat outImage, double thres, double maxval, int type)
+{
+	float mean, stdDeviation;
+	int amount=inImage.cols*inImage.rows;
+	for (int i=0; i<inImage.cols; i++)
+	{
+		for (int j=0; j<inImage.rows; j++)
+		{
+			mean+=inImage.at<uchar>(i,j);
+		}
+	}
+	mean/=amount;
+	for (int i=0; i<inImage.cols; i++)
+	{
+		for (int j=0; j<inImage.rows; j++)
+		{
+			stdDeviation+=pow(mean-inImage.at<uchar>(i,j), 2);
+		}
+	}
+	stdDeviation/=(amount*(amount-1));
+	stdDeviation=sqrt(stdDeviation);
+	threshold(inImage, outImage, (thres*stdDeviation), maxval, type);
 }
 
 void FramesDifference::movingPixels(string txtExport)
@@ -100,7 +125,7 @@ Mat FramesDifference::GaussBlurScenario(Mat old, Mat young)
 	absdiff(old, young, difference_helper);
 	//difference_helper=old;
 	GaussianBlur(difference_helper, difference_help, Size(21, 21), 0, 0);
-	thresholding(difference_help, difference_help, 5, 255, THRESH_BINARY);
+	thresholding(difference_help, difference_help, (short)5, 255, THRESH_BINARY);
 	return difference_help;
 }
 
@@ -111,7 +136,7 @@ Mat FramesDifference::MedianBlurScenario(Mat old, Mat young)
 	absdiff(old, young, difference_helper);
 	//difference_helper=old;
 	medianBlur(difference_helper, difference_help, 11);
-	thresholding(difference_help, difference_help, 5, 255, THRESH_BINARY);
+	thresholding(difference_help, difference_help, (short)5, 255, THRESH_BINARY);
 	return difference_help;
 }
 
@@ -143,7 +168,7 @@ Mat FramesDifference::BoxBlurScenario(Mat old, Mat young)
 		//plik2 << difference_help ; 
 		//plik2.close();
 	}
-	thresholding(difference_help, difference_help, 5, 255, THRESH_BINARY);
+	thresholding(difference_help, difference_help, (short)5, 255, THRESH_BINARY);
 	return difference_help;
 }
 
@@ -164,7 +189,7 @@ Mat FramesDifference::SobelBlurScenario(Mat old, Mat young)
 	absdiff(old, young, difference_helper);
 	//difference_helper=old;
 	boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
-	thresholding(difference_help, difference_help, 5, 255, THRESH_BINARY);
+	thresholding(difference_help, difference_help, (short)5, 255, THRESH_BINARY);
 	erode(difference_help, difference_help2, Mat()/*Mat(3, 3, difference_help.type())*/, Point(-1,-1), 1, BORDER_CONSTANT, morphologyDefaultBorderValue());
 	dilate(difference_help2, difference_help3, Mat(5, 5, difference_help.type()), Point(-1,-1), 1, BORDER_CONSTANT, morphologyDefaultBorderValue());
 	erode(difference_help3, difference_help4, Mat(5, 5, difference_help.type()), Point(-1,-1), 1, BORDER_CONSTANT, morphologyDefaultBorderValue());
@@ -180,9 +205,9 @@ Mat FramesDifference::ThresBoxThresScenario(Mat old, Mat young)
 	Mat difference_helper, difference_help;
 	absdiff(old, young, difference_helper);
 	//difference_helper=old;
-	thresholding(difference_helper, difference_helper, 3, 255, THRESH_TOZERO);
+	thresholding(difference_helper, difference_helper, (short)3, 255, THRESH_TOZERO);
 	boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
-	thresholding(difference_help, difference_help, 5, 255, THRESH_BINARY);
+	thresholding(difference_help, difference_help, (short)5, 255, THRESH_BINARY);
 	return difference_help;
 }
 
@@ -193,7 +218,7 @@ Mat FramesDifference::HistoryScenario(Mat old, Mat young)
 	//difference_helper=old;
 	difference_helper=HistoryMatrix(difference_helper);
 	//boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
-	thresholding(difference_helper, difference_helper, 30, 255, THRESH_BINARY);
+	thresholding(difference_helper, difference_helper, (short)30, 255, THRESH_BINARY);
 	return difference_helper;
 }
 
@@ -204,7 +229,7 @@ Mat FramesDifference::WeightsScenario(Mat old, Mat young)
 	//difference_helper=old;
 	difference_helper=WeightsMatrix(difference_helper);
 	//boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
-	thresholding(difference_helper, difference_helper, 30, 255, THRESH_BINARY);
+	thresholding(difference_helper, difference_helper, (short)3, 255, THRESH_BINARY);
 	return difference_helper;
 }
 
@@ -235,12 +260,13 @@ void FramesDifference::Histogram(Mat frame, string name)
 	system("gnuplot -p -e \"load 'skryptHist.txt'\"");
 }
 
+//to slow
 Mat multiply (Mat frame, Mat weights)
 {
-	Mat result=frame;
-	for (int i=500; i<600/*frame.cols*/; i++)
+	Mat result;
+	for (int i=300; i<frame.cols; i++)
 	{
-		for (int j=300; j<400/*frame.rows*/; j++)
+		for (int j=300; j<frame.rows; j++)
 		{
 			result.at<uchar>(i,j)=frame.at<uchar>(i,j)*weights.at<uchar>(i,j);
 			//result.at<int>(i,j)=(int)frame.at<uchar>(i,j);
@@ -250,9 +276,24 @@ Mat multiply (Mat frame, Mat weights)
 	cout<<"cos";
 	return result;
 }
+	
+Mat multiply (Mat frame, float* colsWeights, float* rowsWeights)
+{
+	for (int i=0; i<frame.cols; i++)
+	{
+		frame.col(i)*=colsWeights[i];//(float)colsWeights.at<uchar>(1,i);
+		//cout<<"!! "<<colsWeights.at<float>(1,i)<<"!! ";
+	}
+	for (int j=0; j<frame.rows; j++)
+	{
+		frame.row(j)*=rowsWeights[j];//(float)rowsWeights.at<uchar>(j,1);
+	}
+	return frame;
+}
 
 Mat FramesDifference::HistoryMatrix(Mat frame)
 {
+	Mat weights;
 	if (ElapsedTime==0)
 	{
 		//weights=Mat(frame.rows, frame.cols, CV_32FC1);
@@ -271,13 +312,55 @@ Mat FramesDifference::WeightsMatrix(Mat frame)
 	if (ElapsedTime==0)
 	{
 		//weights=Mat(frame.rows, frame.cols, CV_32FC1);
-		weights=frame;
-		weights=1;
+		//colsWeights=frame.row(1);
+		//rowsWeights=frame.col(1);
+		//colsWeights=1;
+		//rowsWeights=1;
+		colsWeights=new float[frame.rows];
+		rowsWeights=new float[frame.cols];
+		for (int i=0; i<frame.rows; i++)
+			colsWeights[i]=1;
+		for (int i=0; i<frame.cols; i++)
+			rowsWeights[i]=1;	
+		//cout<<"uwaga!"<<colsWeights.rows<<"\t";
+		//cout<<colsWeights.cols<<endl;
+		//cout<<"uwaga!"<<rowsWeights.rows<<"\t";
+		//cout<<rowsWeights.cols<<endl;
 	}
 	else
 	{
+		int colMax=0, rowMax=0;
+		float colTab[frame.rows], rowTab[frame.cols];
+		for (int i=0; i<frame.rows; i++)
+		{
+			for (int j=0; j<frame.cols; j++)
+			{
+				colTab[i]+=(float)frame.at<uchar>(1,j);
+				//cout<<"!!!"<<colTab[i]<<"!!"<<endl;
+			}
+			if (colTab[i]>colMax) colMax=colTab[i];
+		}
+		for (int i=0; i<frame.rows; i++)
+		{
+			colsWeights[i]+=colTab[i]/colMax;
+			colsWeights[i]/=2;
+		}
+		
+		for (int i=0; i<frame.cols; i++)
+		{
+			for (int j=0; j<frame.rows; j++)
+			{
+				rowTab[i]+=(float)frame.at<uchar>(j,1);	
+			}
+			if (rowTab[i]>rowMax) rowMax=rowTab[i];
+		}
+		for (int i=0; i<frame.cols; i++)
+		{
+			rowsWeights[i]+=rowTab[i]/rowMax;
+			rowsWeights[i]/=2;
+		}
 		//weights=weights/2+frame/2;
 	}
 	
-	return frame*weights;//multiply(frame, weights);
+	return multiply(frame, colsWeights, rowsWeights);
 }
