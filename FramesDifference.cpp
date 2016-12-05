@@ -63,24 +63,16 @@ void FramesDifference::thresholding(Mat inImage, Mat outImage, short thres, doub
 
 void FramesDifference::thresholding(Mat inImage, Mat outImage, double thres, double maxval, int type)
 {
-	float mean, stdDeviation;
+	float stdDeviation=0;
 	int amount=inImage.cols*inImage.rows;
-	for (int i=0; i<inImage.cols; i++)
+	for (int i=0; i<inImage.rows; i++)
 	{
-		for (int j=0; j<inImage.rows; j++)
+		for (int j=0; j<inImage.cols; j++)
 		{
-			mean+=inImage.at<uchar>(i,j);
+			stdDeviation+=pow((float)inImage.at<uchar>(i,j), 2);
 		}
 	}
-	mean/=amount;
-	for (int i=0; i<inImage.cols; i++)
-	{
-		for (int j=0; j<inImage.rows; j++)
-		{
-			stdDeviation+=pow(mean-inImage.at<uchar>(i,j), 2);
-		}
-	}
-	stdDeviation/=(amount*(amount-1));
+	stdDeviation/=(amount-1);
 	stdDeviation=sqrt(stdDeviation);
 	threshold(inImage, outImage, (thres*stdDeviation), maxval, type);
 }
@@ -125,7 +117,7 @@ Mat FramesDifference::GaussBlurScenario(Mat old, Mat young)
 	absdiff(old, young, difference_helper);
 	//difference_helper=old;
 	GaussianBlur(difference_helper, difference_help, Size(21, 21), 0, 0);
-	thresholding(difference_help, difference_help, (short)5, 255, THRESH_BINARY);
+	thresholding(difference_help, difference_help, (double)2.5, 255, THRESH_BINARY);
 	return difference_help;
 }
 
@@ -227,10 +219,10 @@ Mat FramesDifference::WeightsScenario(Mat old, Mat young)
 	Mat difference_helper, difference_help;
 	absdiff(old, young, difference_helper);
 	//difference_helper=old;
-	difference_helper=WeightsMatrix(difference_helper);
-	//boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
-	thresholding(difference_helper, difference_helper, (short)3, 255, THRESH_BINARY);
-	return difference_helper;
+	boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
+	difference_help=WeightsMatrixSecond(difference_help);
+	thresholding(difference_help, difference_help, (short)4, 255, THRESH_BINARY);
+	return difference_help;
 }
 
 //this function is making a histogram from values in pixels in frame
@@ -261,20 +253,22 @@ void FramesDifference::Histogram(Mat frame, string name)
 }
 
 //to slow
-Mat multiply (Mat frame, Mat weights)
+Mat multiply (Mat frame, float* weights)
 {
-	Mat result;
-	for (int i=300; i<frame.cols; i++)
+	//Mat result;
+	for (int i=0; i<frame.rows; i++)
 	{
-		for (int j=300; j<frame.rows; j++)
+		for (int j=0; j<frame.cols; j++)
 		{
-			result.at<uchar>(i,j)=frame.at<uchar>(i,j)*weights.at<uchar>(i,j);
+			frame.at<uchar>(i,j)*=weights[i*frame.cols+j];
+			//result.at<uchar>(i,j)=frame.at<uchar>(i,j)*weights.at<uchar>(i,j);
 			//result.at<int>(i,j)=(int)frame.at<uchar>(i,j);
 			//cout<<i<<" "<<j<<" "<<result.at<int>(i,j)<<endl;
+			//cout<<"cos";
 		}
 	}
-	cout<<"cos";
-	return result;
+	//cout<<"cos";
+	return frame;
 }
 	
 Mat multiply (Mat frame, float* colsWeights, float* rowsWeights)
@@ -330,37 +324,133 @@ Mat FramesDifference::WeightsMatrix(Mat frame)
 	else
 	{
 		int colMax=0, rowMax=0;
-		float colTab[frame.rows], rowTab[frame.cols];
+		float colTab[frame.rows]={0}, rowTab[frame.cols]={0};
 		for (int i=0; i<frame.rows; i++)
 		{
 			for (int j=0; j<frame.cols; j++)
 			{
-				colTab[i]+=(float)frame.at<uchar>(1,j);
+				colTab[i]+=(float)frame.at<uchar>(i,j);
 				//cout<<"!!!"<<colTab[i]<<"!!"<<endl;
+				//if (i==478) cout<<"! "<<(float)frame.at<uchar>(i, j)<<"! ";
 			}
 			if (colTab[i]>colMax) colMax=colTab[i];
+			//if (i==478) cout<<"@ "<<colTab[i]<<" @ ";
+			//cout<<"! "<<(float)frame.at<uchar>(638, 478)<<"! ";
 		}
 		for (int i=0; i<frame.rows; i++)
 		{
-			colsWeights[i]+=colTab[i]/colMax;
+			colsWeights[i]+=(colTab[i]/colMax);
 			colsWeights[i]/=2;
+			//cout<<"@ "<<colsWeights[i]<<" @ ";
 		}
 		
 		for (int i=0; i<frame.cols; i++)
 		{
 			for (int j=0; j<frame.rows; j++)
 			{
-				rowTab[i]+=(float)frame.at<uchar>(j,1);	
+				rowTab[i]+=(float)frame.at<uchar>(j,i);	
 			}
 			if (rowTab[i]>rowMax) rowMax=rowTab[i];
 		}
+		//cout<<"!!!!"<<endl;
 		for (int i=0; i<frame.cols; i++)
 		{
-			rowsWeights[i]+=rowTab[i]/rowMax;
+			rowsWeights[i]+=(rowTab[i]/rowMax);
 			rowsWeights[i]/=2;
+			//cout<<rowsWeights[i]<<" "<<i<<" ";
 		}
+		//cout<<"!!!!"<<endl;
 		//weights=weights/2+frame/2;
 	}
-	
 	return multiply(frame, colsWeights, rowsWeights);
+}
+
+Mat FramesDifference::WeightsMatrixSecond(Mat frame)
+{
+	int amount=frame.rows*frame.cols;
+	if (ElapsedTime==0)
+	{
+		//weights=Mat(frame.rows, frame.cols, CV_32FC1);
+		//colsWeights=frame.row(1);
+		//rowsWeights=frame.col(1);
+		//colsWeights=1;
+		//rowsWeights=1;
+		Weights=new float[amount];
+		for (int i=0; i<amount; i++)
+			Weights[i]=1;
+		//cout<<"uwaga!"<<colsWeights.rows<<"\t";
+		//cout<<colsWeights.cols<<endl;
+		//cout<<"uwaga!"<<rowsWeights.rows<<"\t";
+		//cout<<rowsWeights.cols<<endl;
+		cout<<"hooop";
+	}
+	else
+	{
+		//int colMax=0, rowMax=0;
+		int max=0;
+		float tab[amount]={0};
+		//float colTab[frame.rows]={0}, rowTab[frame.cols]={0};
+		for (int i=0; i<frame.rows; i++)
+		{
+			for (int j=0; j<frame.cols; j++)
+			{
+				tab[i*frame.cols+j]=(float)frame.at<uchar>(i,j);
+				if (tab[i*frame.cols+j]>max) max=tab[i*frame.cols+j];
+				//cout<<"!!!"<<colTab[i]<<"!!"<<endl;
+				//if (i==478) cout<<"! "<<(float)frame.at<uchar>(i, j)<<"! ";
+			}
+			//if (tab[i]>colMax) colMax=colTab[i];
+			//if (i==478) cout<<"@ "<<colTab[i]<<" @ ";
+			//cout<<"! "<<(float)frame.at<uchar>(638, 478)<<"! ";
+		}
+		cout<<"max"<<max;
+		for (int i=0; i<amount; i++)
+		{
+			Weights[i]+=(tab[i]/max);
+			Weights[i]/=2;
+			//cout<<" # "<<Weights[i];
+		}
+		#if 0
+		float maxim=0;
+		for (int i=0; i<amount; i++)
+		{
+			if (Weights[i]>maxim)
+				maxim=Weights[i];
+		}
+		float minim=1;
+		for (int i=0; i<amount; i++)
+		{
+			if (Weights[i]<minim)
+				minim=Weights[i];
+		}
+		cout<<"maxim "<<maxim;
+		cout<<" minim "<<minim;
+		
+		for (int i=0; i<frame.rows; i++)
+		{
+			colsWeights[i]+=(colTab[i]/colMax);
+			colsWeights[i]/=2;
+			//cout<<"@ "<<colsWeights[i]<<" @ ";
+		}
+		
+		for (int i=0; i<frame.cols; i++)
+		{
+			for (int j=0; j<frame.rows; j++)
+			{
+				rowTab[i]+=(float)frame.at<uchar>(j,i);	
+			}
+			if (rowTab[i]>rowMax) rowMax=rowTab[i];
+		}
+		//cout<<"!!!!"<<endl;
+		for (int i=0; i<frame.cols; i++)
+		{
+			rowsWeights[i]+=(rowTab[i]/rowMax);
+			rowsWeights[i]/=2;
+			//cout<<rowsWeights[i]<<" "<<i<<" ";
+		}
+		//cout<<"!!!!"<<endl;
+		//weights=weights/2+frame/2;
+		#endif
+	}
+	return multiply(frame, Weights);
 }

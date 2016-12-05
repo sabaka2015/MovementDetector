@@ -16,6 +16,7 @@ class FramesDifference
 	//static Mat rowsWeights;
 	float * colsWeights;
 	float * rowsWeights;
+	float * Weights;
 	public:
 	static short counterZero;
 	static float ElapsedTime;
@@ -38,6 +39,7 @@ class FramesDifference
 	void Histogram(Mat, string);
 	Mat HistoryMatrix(Mat);
 	Mat WeightsMatrix(Mat);
+	Mat WeightsMatrixSecond(Mat);
 	
 };
 
