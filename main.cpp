@@ -65,8 +65,13 @@ int main ()
 		cout<<"brak pliku lub niewłaściwe nawiązanie połączenia z kamerą\n";
 		return -1;
 	}
-	cout<<"scenariusz:\nGauss: 1 \nMedian: 2\nBox: 3: \nDilat: 4" 
-			"\nSobel: 5 \nThresBoxThres: 6 \nHistory: 7 \nWagi: 8 ";
+	cout<<"1- odejmowanie nastepujacych po sobie klatek"
+			"\n2- odejmowanie od poczatkowej klatki: ";
+	short substractionType;
+	cin>>substractionType;
+	cout<<"\nscenariusz:\nGauss: 1 \nMedian: 2\nBox: 3: \nDilat: 4" 
+			"\nSobel: 5 \nThresBoxThres: 6 \nHistory: 7 \nWagi: 8 "
+			"\nWagi Drugie: 9 ";
 	int scenario;
 	cin>>scenario;
 	cout<<"Czy zapisać film? : ";
@@ -137,7 +142,8 @@ int main ()
 		FramesDifference difference=FramesDifference
 			(olderFrameConv, youngerFrameConv, scenario, txtExport);
 		//youngerFrame/*Conv*/.copyTo(olderFrame/*Conv*/);
-		youngerFrameConv.copyTo(olderFrameConv);
+		if (substractionType==1)
+			youngerFrameConv.copyTo(olderFrameConv);
 		//cvtColor(olderFrame, olderFrameConv, CV_RGB2GRAY);
 		imshow("window", difference.getDifference());
 		if (record)
@@ -167,6 +173,16 @@ int main ()
 			FramesDifference::alarm();
 		}
 		FramesDifference::ElapsedTime+=(framesDistance/1000); //elapsed time
+		if (substractionType==2)
+		{
+			static int nr=1;
+			if(FramesDifference::ElapsedTime>=1*nr)
+				{
+					youngerFrameConv.copyTo(olderFrameConv);
+					nr++;
+				}
+		}
+		cout<<"\t"<<FramesDifference::ElapsedTime<<"\t";
 		int stop = waitKey(framesDistance);
 		if (stop+1) break; //breaking with any key
 	}
