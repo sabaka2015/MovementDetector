@@ -71,7 +71,7 @@ int main ()
 	cin>>substractionType;
 	cout<<"\nscenariusz:\nGauss: 1 \nMedian: 2\nBox: 3: \nDilat: 4" 
 			"\nSobel: 5 \nThresBoxThres: 6 \nHistory: 7 \nWagi: 8 "
-			"\nWagi Drugie: 9 ";
+			"\nWagi Drugie: 9 \nWagi Trzecie: 10 ";
 	int scenario;
 	cin>>scenario;
 	cout<<"Czy zapisać film? : ";
@@ -183,7 +183,7 @@ int main ()
 				}
 		}
 		cout<<"\t"<<FramesDifference::ElapsedTime<<"\t";
-		int stop = waitKey(framesDistance);
+		int stop = waitKey(framesDistance+200);
 		if (stop+1) break; //breaking with any key
 	}
 	//file.close();

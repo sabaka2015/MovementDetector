@@ -41,6 +41,9 @@ FramesDifference::FramesDifference(Mat old, Mat young, int scenario, string txtE
 		case 9:
 			difference=WeightsScenarioThird(old, young);
 			break;
+		case 10:
+			difference=WeightsScenarioFourth(old, young);
+			break;
 	}
 	#if 0
 	Mat difference_helper;
@@ -242,7 +245,20 @@ Mat FramesDifference::WeightsScenarioThird(Mat old, Mat young)
 	//thresholding(difference_helper, difference_helper, (double)1, 255, THRESH_BINARY);
 	//erode(difference_helper, difference_help, Mat(), Point(-1,-1), 3, BORDER_CONSTANT, morphologyDefaultBorderValue());
 	boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
-	thresholding(difference_help, difference_help, (double)3, 255, THRESH_BINARY);
+	thresholding(difference_help, difference_help, (double)3.5, 255, THRESH_BINARY);
+	return difference_help;
+}
+
+Mat FramesDifference::WeightsScenarioFourth(Mat old, Mat young)
+{
+	Mat difference_helper, difference_help, difference_help2;
+	absdiff(old, young, difference_helper);
+	//difference_helper=old;
+	difference_help=WeightsMatrixFourth(difference_helper);	
+	//thresholding(difference_helper, difference_helper, (double)1, 255, THRESH_BINARY);
+	//erode(difference_helper, difference_help, Mat(), Point(-1,-1), 3, BORDER_CONSTANT, morphologyDefaultBorderValue());
+	boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
+	thresholding(difference_help, difference_help, (double)3.5, 255, THRESH_BINARY);
 	return difference_help;
 }
 
@@ -303,6 +319,41 @@ Mat multiply (Mat frame, float* colsWeights, float* rowsWeights)
 	{
 		frame.row(j)*=rowsWeights[j];//(float)rowsWeights.at<uchar>(j,1);
 	}
+	return frame;
+}
+
+Mat multiply (Mat frame, float* weights, short yDist, short xDist, short piksOnYDist, short piksOnXDist)
+{
+	for (int i=0; i<yDist; i++)
+	{
+		for (int j=0; j<xDist; j++)
+		{
+			for (int k=0; k<piksOnYDist; k++)
+			{
+				for (int l=0; l<piksOnXDist; l++)
+				{
+					frame.at<uchar>(k+i*yDist,l+j*xDist)*=weights[i*xDist+j];
+					//tab[i*xDist+j]+=(float)frame.at<uchar>(k+i*yDist,l+j*xDist);
+				}
+			}
+		}
+	}
+	cout<<"\twymnozone\t";
+	//Mat result;
+	#if 0
+	for (int i=0; i<frame.rows; i++)
+	{
+		for (int j=0; j<frame.cols; j++)
+		{
+			frame.at<uchar>(i,j)*=weights[i*frame.cols+j];
+			//result.at<uchar>(i,j)=frame.at<uchar>(i,j)*weights.at<uchar>(i,j);
+			//result.at<int>(i,j)=(int)frame.at<uchar>(i,j);
+			//cout<<i<<" "<<j<<" "<<result.at<int>(i,j)<<endl;
+			//cout<<"cos";
+		}
+	}
+	//cout<<"cos";
+	#endif
 	return frame;
 }
 
@@ -508,8 +559,10 @@ Mat FramesDifference::WeightsMatrixThird(Mat frame)
 			for (int j=0; j<frame.cols; j++)
 			{
 				if (tab[i*frame.cols+j]<(float)frame.at<uchar>(i,j))
+				{
 					tab[i*frame.cols+j]=(float)frame.at<uchar>(i,j);
-				if (tab[i*frame.cols+j]>max) max=tab[i*frame.cols+j];
+					if (tab[i*frame.cols+j]>max) max=tab[i*frame.cols+j];
+				}
 				//cout<<"!!!"<<colTab[i]<<"!!"<<endl;
 				//if (i==478) cout<<"! "<<(float)frame.at<uchar>(i, j)<<"! ";
 			}
@@ -529,13 +582,17 @@ Mat FramesDifference::WeightsMatrixThird(Mat frame)
 				//cout<<" # "<<Weights[i];
 			}
 			nr++;
-			if (nr==20)
+			if (nr==31)
 			{
-				//ofstream plik("wagi.txt", ios::app);
-				for (int i=0; i<amount; i++)
-					//plik << Weights[i]<<"\t";// <<"\t"<< ((float)nonZero/numberOfPixels) << endl; 
-				//plik.close();
-				cout<<Weights[i]<<"\t";
+				ofstream plik("wagi.txt", ios::app);
+				for (int j=0; j<frame.rows; j++)
+				{
+					for (int i=0; i<frame.cols; i++)
+						plik << Weights[j*frame.cols+i]<<"\t";// <<"\t"<< ((float)nonZero/numberOfPixels) << endl; 
+					plik<<"\n";
+				}
+				plik.close();
+				//cout<<Weights[i]<<"\t";
 			}
 		}
 		cout<<" # "<<Weights[220];
@@ -582,4 +639,180 @@ Mat FramesDifference::WeightsMatrixThird(Mat frame)
 		#endif
 	}
 	return multiply(frame, Weights);
+}
+
+//w każdym z kwadratów o wymiarach 5x5cm sumujemy piksele różnicy
+//im większa suma, tym większa waga obszaru
+Mat FramesDifference::WeightsMatrixFourth(Mat frame)
+{
+	const short xDist=24, yDist=12;
+	short piksOnXDist=frame.cols/xDist;
+	short piksOnYDist=frame.rows/yDist;
+	const int amount=xDist*yDist;//frame.rows*frame.cols;
+	static int nr=1;
+	if (ElapsedTime==0)
+	{
+		//weights=Mat(frame.rows, frame.cols, CV_32FC1);
+		//colsWeights=frame.row(1);
+		//rowsWeights=frame.col(1);
+		//colsWeights=1;
+		//rowsWeights=1;
+		Weights=new float[amount];
+		for (int i=0; i<amount; i++)
+			Weights[i]=1.0;
+		//cout<<"wagi!!"<<sizeof(Weights);
+		//cout<<"uwaga!"<<Weights.rows<<"\t";
+		//cout<<Weights.cols<<endl;
+		//cout<<"uwaga!"<<rowsWeights.rows<<"\t";
+		//cout<<rowsWeights.cols<<endl;
+		cout<<"hooop";
+	}
+	else
+	{
+		//int colMax=0, rowMax=0;
+		int max=0;
+		float tab[amount]={0};
+		static float tab2[amount];
+		//float colTab[frame.rows]={0}, rowTab[frame.cols]={0};
+		for (int i=0; i<yDist; i++)
+		{
+			for (int j=0; j<xDist; j++)
+			{
+				for (int k=0; k<piksOnYDist; k++)
+				{
+					for (int l=0; l<piksOnXDist; l++)
+					{
+						tab[i*xDist+j]+=(float)frame.at<uchar>(k+i*yDist,l+j*xDist);
+					}
+				}
+			}
+		}
+		for (int i=0; i<yDist; i++)
+		{
+			for (int j=0; j<xDist; j++)
+			{
+				if (tab[i*xDist+j]>tab2[i*xDist+j])
+				{
+					tab2[i*xDist+j]=tab[i*xDist+j];
+					if (tab2[i*xDist+j]>max) max=tab2[i*xDist+j];
+				}
+			}
+		}
+		if(FramesDifference::ElapsedTime>=1*nr)
+		{
+			cout<<"!!"<<sizeof(tab2)<<"!!!"<<sizeof(Weights)<<"!!!!"<<amount;
+			for (int i=0; i<(amount); i++)
+			{
+				cout<<i<<"\t";
+				//Weights[i]*=5;
+				//Weights[i]+=(tab2[i]/max);
+				//Weights[i]/=2;
+				Weights[i]*=1;
+				//cout<<" # "<<Weights[i];
+				tab2[i]=0;
+			}
+			nr++;
+			#if 0
+			if (nr==31)
+			{
+				ofstream plik("wagi.txt", ios::app);
+				for (int j=0; j<frame.rows; j++)
+				{
+					for (int i=0; i<frame.cols; i++)
+						plik << Weights[j*frame.cols+i]<<"\t";// <<"\t"<< ((float)nonZero/numberOfPixels) << endl; 
+					plik<<"\n";
+				}
+				plik.close();
+				//cout<<Weights[i]<<"\t";
+			}
+			#endif
+		}
+		#if 0
+		for (int i=0; i<frame.rows; i++)
+		{
+			for (int j=0; j<frame.cols; j++)
+			{
+				if (tab[i*frame.cols+j]<(float)frame.at<uchar>(i,j))
+				{
+					tab[i*frame.cols+j]=(float)frame.at<uchar>(i,j);
+					if (tab[i*frame.cols+j]>max) max=tab[i*frame.cols+j];
+				}
+				//cout<<"!!!"<<colTab[i]<<"!!"<<endl;
+				//if (i==478) cout<<"! "<<(float)frame.at<uchar>(i, j)<<"! ";
+			}
+			//if (tab[i]>colMax) colMax=colTab[i];
+			//if (i==478) cout<<"@ "<<colTab[i]<<" @ ";
+			//cout<<"! "<<(float)frame.at<uchar>(638, 478)<<"! ";
+		}
+		cout<<"max"<<max;
+		cout<<"@ "<<nr<<endl;
+		if(FramesDifference::ElapsedTime>=1*nr)
+		{
+			for (int i=0; i<amount; i++)
+			{
+				Weights[i]*=5;
+				Weights[i]+=(tab[i]/max);
+				Weights[i]/=6;
+				//cout<<" # "<<Weights[i];
+			}
+			nr++;
+			if (nr==31)
+			{
+				ofstream plik("wagi.txt", ios::app);
+				for (int j=0; j<frame.rows; j++)
+				{
+					for (int i=0; i<frame.cols; i++)
+						plik << Weights[j*frame.cols+i]<<"\t";// <<"\t"<< ((float)nonZero/numberOfPixels) << endl; 
+					plik<<"\n";
+				}
+				plik.close();
+				//cout<<Weights[i]<<"\t";
+			}
+		}
+		cout<<" # "<<Weights[220];
+		#endif
+		#if 0
+		float maxim=0;
+		for (int i=0; i<amount; i++)
+		{
+			if (Weights[i]>maxim)
+				maxim=Weights[i];
+		}
+		float minim=1;
+		for (int i=0; i<amount; i++)
+		{
+			if (Weights[i]<minim)
+				minim=Weights[i];
+		}
+		cout<<"maxim "<<maxim;
+		cout<<" minim "<<minim;
+		
+		for (int i=0; i<frame.rows; i++)
+		{
+			colsWeights[i]+=(colTab[i]/colMax);
+			colsWeights[i]/=2;
+			//cout<<"@ "<<colsWeights[i]<<" @ ";
+		}
+		
+		for (int i=0; i<frame.cols; i++)
+		{
+			for (int j=0; j<frame.rows; j++)
+			{
+				rowTab[i]+=(float)frame.at<uchar>(j,i);	
+			}
+			if (rowTab[i]>rowMax) rowMax=rowTab[i];
+		}
+		//cout<<"!!!!"<<endl;
+		for (int i=0; i<frame.cols; i++)
+		{
+			rowsWeights[i]+=(rowTab[i]/rowMax);
+			rowsWeights[i]/=2;
+			//cout<<rowsWeights[i]<<" "<<i<<" ";
+		}
+		//cout<<"!!!!"<<endl;
+		//weights=weights/2+frame/2;
+		#endif
+	}
+	cout<<"\tmnozenie\t";
+	return multiply(frame, Weights, xDist, yDist, piksOnYDist, piksOnXDist);
 }

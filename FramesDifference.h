@@ -37,11 +37,13 @@ class FramesDifference
 	Mat HistoryScenario(Mat, Mat);
 	Mat WeightsScenario(Mat, Mat);
 	Mat WeightsScenarioThird(Mat, Mat);
+	Mat WeightsScenarioFourth(Mat, Mat);
 	void Histogram(Mat, string);
 	Mat HistoryMatrix(Mat);
 	Mat WeightsMatrix(Mat);
 	Mat WeightsMatrixSecond(Mat);
 	Mat WeightsMatrixThird(Mat);
+	Mat WeightsMatrixFourth(Mat);
 	
 };
 
