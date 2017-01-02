@@ -142,8 +142,10 @@ int main ()
 		FramesDifference difference=FramesDifference
 			(olderFrameConv, youngerFrameConv, scenario, txtExport);
 		//youngerFrame/*Conv*/.copyTo(olderFrame/*Conv*/);
+		cout<<"pzed copy ";
 		if (substractionType==1)
 			youngerFrameConv.copyTo(olderFrameConv);
+		cout<<"po copy ";
 		//cvtColor(olderFrame, olderFrameConv, CV_RGB2GRAY);
 		imshow("window", difference.getDifference());
 		if (record)
@@ -167,7 +169,9 @@ int main ()
 		}
 		#endif
 		//alarm if time without movement is longer than 20s
-		cout<<endl<<(FramesDifference::counterZero*framesDistance)<<endl;
+		cout<<"przed counter ";
+		//cout<<endl<<(FramesDifference::counterZero*framesDistance)<<endl;
+		cout<<"przed alarm ";
 		if (FramesDifference::counterZero*framesDistance>=20000)
 		{
 			FramesDifference::alarm();
@@ -176,14 +180,14 @@ int main ()
 		if (substractionType==2)
 		{
 			static int nr=1;
-			if(FramesDifference::ElapsedTime>=1*nr)
+			if(FramesDifference::ElapsedTime>=2*nr)
 				{
 					youngerFrameConv.copyTo(olderFrameConv);
 					nr++;
 				}
 		}
 		cout<<"\t"<<FramesDifference::ElapsedTime<<"\t";
-		int stop = waitKey(framesDistance+200);
+		int stop = waitKey(framesDistance);
 		if (stop+1) break; //breaking with any key
 	}
 	//file.close();

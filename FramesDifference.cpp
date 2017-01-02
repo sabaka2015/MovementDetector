@@ -228,7 +228,7 @@ Mat FramesDifference::WeightsScenario(Mat old, Mat young)
 	Mat difference_helper, difference_help, difference_help2;
 	absdiff(old, young, difference_helper);
 	//difference_helper=old;
-	difference_help=WeightsMatrixSecond(difference_helper);	
+	//difference_help=WeightsMatrixSecond(difference_helper);	
 	//thresholding(difference_helper, difference_helper, (double)1, 255, THRESH_BINARY);
 	//erode(difference_helper, difference_help, Mat(), Point(-1,-1), 3, BORDER_CONSTANT, morphologyDefaultBorderValue());
 	boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
@@ -241,7 +241,7 @@ Mat FramesDifference::WeightsScenarioThird(Mat old, Mat young)
 	Mat difference_helper, difference_help, difference_help2;
 	absdiff(old, young, difference_helper);
 	//difference_helper=old;
-	difference_help=WeightsMatrixThird(difference_helper);	
+	//difference_help=WeightsMatrixThird(difference_helper);	
 	//thresholding(difference_helper, difference_helper, (double)1, 255, THRESH_BINARY);
 	//erode(difference_helper, difference_help, Mat(), Point(-1,-1), 3, BORDER_CONSTANT, morphologyDefaultBorderValue());
 	boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
@@ -257,9 +257,10 @@ Mat FramesDifference::WeightsScenarioFourth(Mat old, Mat young)
 	difference_help=WeightsMatrixFourth(difference_helper);	
 	//thresholding(difference_helper, difference_helper, (double)1, 255, THRESH_BINARY);
 	//erode(difference_helper, difference_help, Mat(), Point(-1,-1), 3, BORDER_CONSTANT, morphologyDefaultBorderValue());
-	boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
-	thresholding(difference_help, difference_help, (double)3.5, 255, THRESH_BINARY);
-	return difference_help;
+	boxFilter(difference_help, difference_help2, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
+	//difference_helper=WeightsMatrixFourth(difference_help);	
+	thresholding(difference_help2, difference_help2, (double)4, 255, THRESH_BINARY);
+	return difference_help2;
 }
 
 //this function is making a histogram from values in pixels in frame
@@ -322,17 +323,19 @@ Mat multiply (Mat frame, float* colsWeights, float* rowsWeights)
 	return frame;
 }
 
-Mat multiply (Mat frame, float* weights, short yDist, short xDist, short piksOnYDist, short piksOnXDist)
+Mat selectHighestArea (Mat, float*, short, short, float, float);
+
+Mat multiply (Mat frame, float* weights, short yDist, short xDist, float piksOnYDist, float piksOnXDist)
 {
 	for (int i=0; i<yDist; i++)
 	{
 		for (int j=0; j<xDist; j++)
 		{
-			for (int k=0; k<piksOnYDist; k++)
+			for (int l=0; l<piksOnXDist; l++/*int k=0; k<piksOnYDist; k++*/)
 			{
-				for (int l=0; l<piksOnXDist; l++)
+				for (int k=0; k<piksOnYDist; k++/*int l=0; l<piksOnXDist; l++*/)
 				{
-					frame.at<uchar>(k+i*yDist,l+j*xDist)*=weights[i*xDist+j];
+					frame.at<uchar>(k+i*piksOnYDist, l+j*piksOnXDist)*=weights[i*xDist+j];
 					//tab[i*xDist+j]+=(float)frame.at<uchar>(k+i*yDist,l+j*xDist);
 				}
 			}
@@ -354,7 +357,7 @@ Mat multiply (Mat frame, float* weights, short yDist, short xDist, short piksOnY
 	}
 	//cout<<"cos";
 	#endif
-	return frame;
+	return frame;//selectHighestArea (frame, weights, yDist, xDist, piksOnYDist, piksOnXDist);
 }
 
 Mat FramesDifference::HistoryMatrix(Mat frame)
@@ -646,9 +649,10 @@ Mat FramesDifference::WeightsMatrixThird(Mat frame)
 Mat FramesDifference::WeightsMatrixFourth(Mat frame)
 {
 	const short xDist=24, yDist=12;
-	short piksOnXDist=frame.cols/xDist;
-	short piksOnYDist=frame.rows/yDist;
+	float piksOnXDist=(float)frame.cols/xDist;
+	float piksOnYDist=(float)frame.rows/yDist;
 	const int amount=xDist*yDist;//frame.rows*frame.cols;
+	cout<<"amount: "<<amount<<endl;
 	static int nr=1;
 	if (ElapsedTime==0)
 	{
@@ -670,7 +674,7 @@ Mat FramesDifference::WeightsMatrixFourth(Mat frame)
 	else
 	{
 		//int colMax=0, rowMax=0;
-		int max=0;
+		static float max=0;
 		float tab[amount]={0};
 		static float tab2[amount];
 		//float colTab[frame.rows]={0}, rowTab[frame.cols]={0};
@@ -682,7 +686,7 @@ Mat FramesDifference::WeightsMatrixFourth(Mat frame)
 				{
 					for (int l=0; l<piksOnXDist; l++)
 					{
-						tab[i*xDist+j]+=(float)frame.at<uchar>(k+i*yDist,l+j*xDist);
+						tab[i*xDist+j]+=(float)frame.at<uchar>(k+i*piksOnYDist,l+j*piksOnXDist);
 					}
 				}
 			}
@@ -694,38 +698,53 @@ Mat FramesDifference::WeightsMatrixFourth(Mat frame)
 				if (tab[i*xDist+j]>tab2[i*xDist+j])
 				{
 					tab2[i*xDist+j]=tab[i*xDist+j];
-					if (tab2[i*xDist+j]>max) max=tab2[i*xDist+j];
+					if (tab2[i*xDist+j]>=max) max=tab2[i*xDist+j];
 				}
 			}
 		}
-		if(FramesDifference::ElapsedTime>=1*nr)
+		if(FramesDifference::ElapsedTime>=2*nr)
 		{
 			cout<<"!!"<<sizeof(tab2)<<"!!!"<<sizeof(Weights)<<"!!!!"<<amount;
 			for (int i=0; i<(amount); i++)
 			{
-				cout<<i<<"\t";
-				//Weights[i]*=5;
-				//Weights[i]+=(tab2[i]/max);
-				//Weights[i]/=2;
-				Weights[i]*=1;
+				//cout<<i<<"\t";
+				Weights[i]*=5;
+				Weights[i]+=(tab2[i]/max);
+				Weights[i]/=6;
+				//Weights[i]*=2;
 				//cout<<" # "<<Weights[i];
+				cout<<Weights[i]<<"\t";//<<tab2[i]/max<<"\t";
+				//cout<<"wwww: "<<Weights[24*12]<<endl;
 				tab2[i]=0;
 			}
-			nr++;
-			#if 0
+			cout<<"wwww: "<<Weights[24*12]<<endl;
+			/*Weights[17]*=2;
+			Weights[19]*=2;
+			Weights[127]*=2;
+			Weights[128]*=2;
+			Weights[154]*=2;
+			Weights[163]*=2;
+			Weights[190]*=2;
+			Weights[283]*=2;
+			Weights[284]*=2;
+			*/nr++;
+			max=0;
+			//#if 0
 			if (nr==31)
 			{
-				ofstream plik("wagi.txt", ios::app);
-				for (int j=0; j<frame.rows; j++)
+				ofstream plik("wagi4.txt", ios::app);
+				for (int j=0; j<yDist; j++)
 				{
-					for (int i=0; i<frame.cols; i++)
-						plik << Weights[j*frame.cols+i]<<"\t";// <<"\t"<< ((float)nonZero/numberOfPixels) << endl; 
+					for (int i=0; i<xDist; i++)
+						//cout<<Weights[j*xDist+i]<<"\t";
+						plik << Weights[j*xDist+i]<<"\t";// <<"\t"<< ((float)nonZero/numberOfPixels) << endl; 
+					//cout<<"\n";
 					plik<<"\n";
 				}
 				plik.close();
 				//cout<<Weights[i]<<"\t";
 			}
-			#endif
+			//#endif
 		}
 		#if 0
 		for (int i=0; i<frame.rows; i++)
@@ -750,9 +769,9 @@ Mat FramesDifference::WeightsMatrixFourth(Mat frame)
 		{
 			for (int i=0; i<amount; i++)
 			{
-				Weights[i]*=5;
+				//Weights[i]*=5;
 				Weights[i]+=(tab[i]/max);
-				Weights[i]/=6;
+				Weights[i]/=2;
 				//cout<<" # "<<Weights[i];
 			}
 			nr++;
@@ -814,5 +833,25 @@ Mat FramesDifference::WeightsMatrixFourth(Mat frame)
 		#endif
 	}
 	cout<<"\tmnozenie\t";
-	return multiply(frame, Weights, xDist, yDist, piksOnYDist, piksOnXDist);
+	return multiply(frame, Weights, yDist, xDist, piksOnYDist, piksOnXDist);
+}
+
+Mat selectHighestArea (Mat frame, float* weights, short yDist, short xDist, float piksOnYDist, float piksOnXDist)
+{
+	float max=0;
+	short xMax, yMax;
+	for (int i=0; i<yDist; i++)
+	{
+		for (int j=0; j<xDist; j++)
+		{
+			if (weights[i*xDist+j]>max)
+			{
+				max=weights[i*xDist+j];
+				xMax=j;
+				yMax=i;
+			}
+		}		
+	}	
+	rectangle(frame, Point(xMax*piksOnXDist, yMax*piksOnYDist), Point((xMax+1)*piksOnXDist, (yMax+1)*piksOnYDist), Scalar(255, 0, 0), 1, 8, 0);
+	return frame;
 }
