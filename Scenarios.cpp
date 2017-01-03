@@ -164,13 +164,18 @@ Mat FramesDifference::BoxBlurScenarioLiveWeights(Mat minued, Mat young, Mat old)
 
 Mat FramesDifference::BoxBlurScenarioDelayedWeights(Mat minued, Mat young, Mat first)
 {
-	Mat difference_helper, difference_help, difference_help2;
+	Mat difference_helper, difference_help, difference_help2, difference_help3;
+	//float *weights;
+	short yDist, xDist;
+	float piksOnYDist, piksOnXDist;
 	absdiff(minued, young, difference_helper);
 	//difference_helper=old;
-	difference_help=WeightsMatrixFourth(first, young);
+	difference_help=WeightsMatrixFourth(first, young, yDist, xDist, piksOnYDist, piksOnXDist);
 	boxFilter(difference_help, difference_help2, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
-	thresholding(difference_help2, difference_help2, (double)4, 255, THRESH_BINARY);
-	return difference_help2;
+	thresholding(difference_help2, difference_help2, (double)3, 255, THRESH_BINARY);
+	young.copyTo(difference_help2); //to see rectangles on real video
+	difference_help3=selectHighestArea(difference_help2, Weights, yDist, xDist, piksOnYDist, piksOnXDist);
+	return difference_help3;
 }
 
 Mat FramesDifference::HistoryMatrix(Mat frame)
@@ -461,13 +466,17 @@ Mat FramesDifference::WeightsMatrixThird(Mat frame)
 
 //w każdym z kwadratów o wymiarach 5x5cm sumujemy piksele różnicy
 //im większa suma, tym większa waga obszaru
-Mat FramesDifference::WeightsMatrixFourth(Mat first, Mat young)
+Mat FramesDifference::WeightsMatrixFourth(Mat first, Mat young, short& yDistHelp, short& xDistHelp, float& piksOnYDist, float& piksOnXDist)//(Mat first, Mat young)
 {
 	Mat difference;
 	absdiff(first, young, difference);
 	const short xDist=24, yDist=12;
-	float piksOnXDist=(float)difference.cols/xDist;
-	float piksOnYDist=(float)difference.rows/yDist;
+	xDistHelp=xDist;
+	yDistHelp=yDist;
+	//float piksOnXDist=(float)difference.cols/xDist;
+	piksOnXDist=(float)difference.cols/xDist;
+	//float piksOnYDist=(float)difference.rows/yDist;
+	piksOnYDist=(float)difference.rows/yDist;
 	const int amount=xDist*yDist;//frame.rows*frame.cols;
 	cout<<"amount: "<<amount<<endl;
 	static int nr=1;

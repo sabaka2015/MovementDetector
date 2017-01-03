@@ -49,7 +49,7 @@ class FramesDifference
 	Mat WeightsMatrixSecond(Mat);
 	Mat WeightsMatrixThird(Mat);
 	Mat WeightsMatrixFourth(Mat);
-	Mat WeightsMatrixFourth(Mat, Mat);
+	Mat WeightsMatrixFourth(Mat, Mat, short&, short&, float&, float&);
 	
 };
 
