@@ -22,7 +22,7 @@ class FramesDifference
 	static short counterZero;
 	static float ElapsedTime;
 	//FramesDifference(Mat old, Mat young, int scenario, string txtExport);
-	FramesDifference(Mat old, Mat young, Mat first, int scenario, string txtExport, short substractionType, bool ifWeights, short typeOfSum);
+	FramesDifference(Mat old, Mat young, Mat first, int scenario, string txtExport, short substractionType, bool ifWeights, short typeOfSum, float firstTimeOfLive);
 	Mat getDifference(void) {return difference;};
 	void thresholding(Mat, Mat, short, double, int); 
 		//threshold is equal to the short number
@@ -40,12 +40,16 @@ class FramesDifference
 	Mat WeightsScenario(Mat, Mat);
 	Mat WeightsScenarioThird(Mat, Mat);
 	Mat WeightsScenarioFourth(Mat, Mat);
+	Mat BoxBlurScenarioLiveWeights(Mat, Mat, Mat);
+	Mat BoxBlurScenarioDelayedWeights(Mat, Mat, Mat);
 	void Histogram(Mat, string);
 	Mat HistoryMatrix(Mat);
 	Mat WeightsMatrix(Mat);
+	Mat WeightsMatrix(Mat, Mat);
 	Mat WeightsMatrixSecond(Mat);
 	Mat WeightsMatrixThird(Mat);
 	Mat WeightsMatrixFourth(Mat);
+	Mat WeightsMatrixFourth(Mat, Mat);
 	
 };
 

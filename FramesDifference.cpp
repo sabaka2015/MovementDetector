@@ -5,7 +5,7 @@ float FramesDifference::ElapsedTime=0;
 //Mat FramesDifference::colsWeights=Mat();
 //Mat FramesDifference::rowsWeights=Mat();
 
-FramesDifference::FramesDifference(Mat old, Mat young, Mat first, int scenario, string txtExport, short substractionType, bool ifWeights, short typeOfSum)
+FramesDifference::FramesDifference(Mat old, Mat young, Mat first, int scenario, string txtExport, short substractionType, bool ifWeights, short typeOfSum, float firstTimeOfLive)
 {
 	/*if (ElapsedTime==0.924)
 	ofstream plik(txtExp, ios::app);
@@ -24,6 +24,7 @@ FramesDifference::FramesDifference(Mat old, Mat young, Mat first, int scenario, 
 		else
 			scenario+=100;
 	}
+	cout<<"scenariusz: "<<scenario<<endl;
 	switch (scenario)
 	{
 		//without weights
@@ -59,45 +60,55 @@ FramesDifference::FramesDifference(Mat old, Mat young, Mat first, int scenario, 
 			break;
 		*/
 		//with weights "live"
-		#if 0
+		
 		case 11:
-			difference=GaussBlurScenario(old, young);
+			cout<<"Brak scenariusza, koniec programu!";
+			//difference=GaussBlurScenario(minued, young, old);
 			break;
 		case 12:
-			difference=MedianBlurScenario(old, young);
+			cout<<"Brak scenariusza, koniec programu!";
+			//difference=MedianBlurScenario(minued, young, old);
 			break;
 		case 13:
-			difference=BoxBlurScenario(old, young);
+			difference=BoxBlurScenarioLiveWeights(minued, young, old);
 			break;
 		case 14:
-			difference=DilatBlurScenario(old, young);
+			cout<<"Brak scenariusza, koniec programu!";
+			//difference=DilatBlurScenario(minued, young, old);
 			break;
 		case 15:
-			difference=SobelBlurScenario(old, young);
+			cout<<"Brak scenariusza, koniec programu!";
+			//difference=SobelBlurScenario(minued, young, old);
 			break;
 		case 16:
-			difference=ThresBoxThresScenario(old, young);
+			cout<<"Brak scenariusza, koniec programu!";
+			//difference=ThresBoxThresScenario(minued, young, old);
 			break;
+			
 		//with delayed weights
 		case 101:
-			difference=GaussBlurScenario(old, young);
+			cout<<"Brak scenariusza, koniec programu!";
+			//difference=GaussBlurScenario(old, young);
 			break;
 		case 102:
-			difference=MedianBlurScenario(old, young);
+			cout<<"Brak scenariusza, koniec programu!";
+			//difference=MedianBlurScenario(old, young);
 			break;
 		case 103:
-			difference=BoxBlurScenario(old, young);
+			difference=BoxBlurScenarioDelayedWeights(minued, young, first);
 			break;
 		case 104:
-			difference=DilatBlurScenario(old, young);
+			cout<<"Brak scenariusza, koniec programu!";
+			//difference=DilatBlurScenario(old, young);
 			break;
 		case 105:
-			difference=SobelBlurScenario(old, young);
+			cout<<"Brak scenariusza, koniec programu!";
+			//difference=SobelBlurScenario(old, young);
 			break;
 		case 106:
-			difference=ThresBoxThresScenario(old, young);
+			cout<<"Brak scenariusza, koniec programu!";
+			//difference=ThresBoxThresScenario(old, young);
 			break;
-		#endif
 	}
 	#if 0
 	Mat difference_helper;
