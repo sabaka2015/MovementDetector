@@ -65,15 +65,37 @@ int main ()
 		cout<<"brak pliku lub niewłaściwe nawiązanie połączenia z kamerą\n";
 		return -1;
 	}
+	
+	
 	cout<<"1- odejmowanie nastepujacych po sobie klatek"
-			"\n2- odejmowanie od poczatkowej klatki: ";
+			"\n0- odejmowanie od poczatkowej klatki: ";
+	
 	short substractionType;
 	cin>>substractionType;
+	cout<<"Czy uwzględnić współczynniki wagowe (uwzglądnienie historii)"
+			" 1- tak, 0- nie : ";
+	bool ifWeights;
+	cin>>ifWeights;
+	short typeOfSum=1;
+	if (ifWeights)
+	{
+		cout<<"współczynniki wagowe modyfikowane na bierząco- 1\n"
+				"co pewien czas- 0 : ";
+		cin>>typeOfSum;
+	}
+	short ifFirst=substractionType*typeOfSum;
+	
+	cout<<"\nscenariusz:\nGauss: 1 \nMedian: 2\nBox: 3: \nDilat: 4" 
+			"\nSobel: 5 \nThresBoxThres: 6 ";
+	int scenario;
+	cin>>scenario;
+	#if 0
 	cout<<"\nscenariusz:\nGauss: 1 \nMedian: 2\nBox: 3: \nDilat: 4" 
 			"\nSobel: 5 \nThresBoxThres: 6 \nHistory: 7 \nWagi: 8 "
 			"\nWagi Drugie: 9 \nWagi Trzecie: 10 ";
 	int scenario;
 	cin>>scenario;
+	#endif
 	cout<<"Czy zapisać film? : ";
 	bool record;
 	cin>>record;
@@ -91,11 +113,12 @@ int main ()
 	
 	//read the first frame
 	Mat olderFrame, youngerFrame, olderFrameConv, youngerFrameConv;
+	Mat firstFrameConv;
 	arm>>olderFrame;
 	//olderFrame=imread("roznice/frodo2/nothres/dilat1/d00.bmp");
 	cvtColor(olderFrame, olderFrameConv, CV_RGB2GRAY); //conversion from RGB to other color space- to save the memory
 	//to Luv-4B, to gray-4B, to XYZ-4B, to XSV-4B
-
+	olderFrameConv.copyTo(firstFrameConv);
 	cout << "klatki" << fps << endl;
 	//distance between frames in ms
 	double framesDistance = 1000 / fps;
@@ -140,12 +163,11 @@ int main ()
 		//cvtColor(olderFrame, olderFrameConv, CV_RGB2GRAY);
 		//object of the new class- difference between following frames
 		FramesDifference difference=FramesDifference
-			(olderFrameConv, youngerFrameConv, scenario, txtExport);
-		//youngerFrame/*Conv*/.copyTo(olderFrame/*Conv*/);
-		cout<<"pzed copy ";
-		if (substractionType==1)
-			youngerFrameConv.copyTo(olderFrameConv);
-		cout<<"po copy ";
+			(olderFrameConv, youngerFrameConv, firstFrameConv, 
+				scenario, txtExport, substractionType, ifWeights, typeOfSum);
+		
+			//youngerFrame/*Conv*/.copyTo(olderFrame/*Conv*/);
+		youngerFrameConv.copyTo(olderFrameConv);
 		//cvtColor(olderFrame, olderFrameConv, CV_RGB2GRAY);
 		imshow("window", difference.getDifference());
 		if (record)
@@ -177,12 +199,12 @@ int main ()
 			FramesDifference::alarm();
 		}
 		FramesDifference::ElapsedTime+=(framesDistance/1000); //elapsed time
-		if (substractionType==2)
+		if (ifFirst==0)
 		{
 			static int nr=1;
 			if(FramesDifference::ElapsedTime>=2*nr)
 				{
-					youngerFrameConv.copyTo(olderFrameConv);
+					youngerFrameConv.copyTo(firstFrameConv);
 					nr++;
 				}
 		}

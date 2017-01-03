@@ -17,10 +17,12 @@ class FramesDifference
 	float * colsWeights;
 	float * rowsWeights;
 	float * Weights;
+	
 	public:
 	static short counterZero;
 	static float ElapsedTime;
-	FramesDifference(Mat old, Mat young, int scenario, string txtExport);
+	//FramesDifference(Mat old, Mat young, int scenario, string txtExport);
+	FramesDifference(Mat old, Mat young, Mat first, int scenario, string txtExport, short substractionType, bool ifWeights, short typeOfSum);
 	Mat getDifference(void) {return difference;};
 	void thresholding(Mat, Mat, short, double, int); 
 		//threshold is equal to the short number
@@ -46,5 +48,11 @@ class FramesDifference
 	Mat WeightsMatrixFourth(Mat);
 	
 };
+
+Mat selectHighestArea (Mat, float*, short, short, float, float);
+Mat multiply (Mat, float*);
+Mat multiply (Mat, float*, float*);
+Mat multiply (Mat, float*, short, short, float, float);
+Mat selectHighestArea (Mat, float*, short, short, float, float);
 
 #endif
