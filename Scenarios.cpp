@@ -11,8 +11,8 @@ Mat FramesDifference::GaussBlurScenario(Mat minued, Mat young)
 	Mat difference_helper, difference_help;
 	absdiff(minued, young, difference_helper);
 	//difference_helper=old;
-	GaussianBlur(difference_helper, difference_help, Size(21, 21), 0, 0);
-	thresholding(difference_help, difference_help, (double)2.5, 255, THRESH_BINARY);
+	GaussianBlur(difference_helper, difference_help, Size(15, 15), 0, 0);
+	thresholding(difference_help, difference_help, (double)3, 255, THRESH_BINARY);
 	return difference_help;
 }
 
@@ -162,7 +162,7 @@ Mat FramesDifference::BoxBlurScenarioLiveWeights(Mat minued, Mat young, Mat old)
 	return difference_help2;
 }
 
-Mat FramesDifference::BoxBlurScenarioDelayedWeights(Mat minued, Mat young, Mat first)
+Mat FramesDifference::BoxBlurScenarioDelayedWeights(Mat minued, Mat young, Mat first, float firstTimeOfLive)
 {
 	Mat difference_helper, difference_help, difference_help2, difference_help3;
 	//float *weights;
@@ -170,7 +170,7 @@ Mat FramesDifference::BoxBlurScenarioDelayedWeights(Mat minued, Mat young, Mat f
 	float piksOnYDist, piksOnXDist;
 	absdiff(minued, young, difference_helper);
 	//difference_helper=old;
-	difference_help=WeightsMatrixFourth(first, young, yDist, xDist, piksOnYDist, piksOnXDist);
+	difference_help=WeightsMatrixFourth(first, young, yDist, xDist, piksOnYDist, piksOnXDist, firstTimeOfLive);
 	boxFilter(difference_help, difference_help2, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
 	thresholding(difference_help2, difference_help2, (double)3, 255, THRESH_BINARY);
 	young.copyTo(difference_help2); //to see rectangles on real video
@@ -466,7 +466,7 @@ Mat FramesDifference::WeightsMatrixThird(Mat frame)
 
 //w każdym z kwadratów o wymiarach 5x5cm sumujemy piksele różnicy
 //im większa suma, tym większa waga obszaru
-Mat FramesDifference::WeightsMatrixFourth(Mat first, Mat young, short& yDistHelp, short& xDistHelp, float& piksOnYDist, float& piksOnXDist)//(Mat first, Mat young)
+Mat FramesDifference::WeightsMatrixFourth(Mat first, Mat young, short& yDistHelp, short& xDistHelp, float& piksOnYDist, float& piksOnXDist, float firstTimeOfLive)//(Mat first, Mat young)
 {
 	Mat difference;
 	absdiff(first, young, difference);
@@ -528,7 +528,7 @@ Mat FramesDifference::WeightsMatrixFourth(Mat first, Mat young, short& yDistHelp
 				}
 			}
 		}
-		if(FramesDifference::ElapsedTime>=2*nr)
+		if(FramesDifference::ElapsedTime>=firstTimeOfLive*nr)
 		{
 			cout<<"!!"<<sizeof(tab2)<<"!!!"<<sizeof(Weights)<<"!!!!"<<amount;
 			for (int i=0; i<(amount); i++)

@@ -1,2 +1,2 @@
 set yrange [0:0.005]
-plot "proba114.txt" with linespoints pt 2 ps 2 lt 2 lw 1
+plot "proba10.txt" with linespoints pt 2 ps 2 lt 2 lw 1

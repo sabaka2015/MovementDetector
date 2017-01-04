@@ -41,7 +41,7 @@ class FramesDifference
 	Mat WeightsScenarioThird(Mat, Mat);
 	Mat WeightsScenarioFourth(Mat, Mat);
 	Mat BoxBlurScenarioLiveWeights(Mat, Mat, Mat);
-	Mat BoxBlurScenarioDelayedWeights(Mat, Mat, Mat);
+	Mat BoxBlurScenarioDelayedWeights(Mat, Mat, Mat, float);
 	void Histogram(Mat, string);
 	Mat HistoryMatrix(Mat);
 	Mat WeightsMatrix(Mat);
@@ -49,9 +49,10 @@ class FramesDifference
 	Mat WeightsMatrixSecond(Mat);
 	Mat WeightsMatrixThird(Mat);
 	Mat WeightsMatrixFourth(Mat);
-	Mat WeightsMatrixFourth(Mat, Mat, short&, short&, float&, float&);
+	Mat WeightsMatrixFourth(Mat, Mat, short&, short&, float&, float&, float);
 	
 };
+
 
 Mat selectHighestArea (Mat, float*, short, short, float, float);
 Mat multiply (Mat, float*);

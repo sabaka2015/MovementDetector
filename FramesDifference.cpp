@@ -95,7 +95,7 @@ FramesDifference::FramesDifference(Mat old, Mat young, Mat first, int scenario, 
 			//difference=MedianBlurScenario(old, young);
 			break;
 		case 103:
-			difference=BoxBlurScenarioDelayedWeights(minued, young, first);
+			difference=BoxBlurScenarioDelayedWeights(minued, young, first, firstTimeOfLive);
 			break;
 		case 104:
 			cout<<"Brak scenariusza, koniec programu!";

@@ -66,12 +66,13 @@ int main ()
 		return -1;
 	}
 	
-	float firstTimeOfLive; //time of live of the firstFrame
+	//float firstTimeOfLive; //time of live of the firstFrame
 	cout<<"1- odejmowanie nastepujacych po sobie klatek"
 			"\n0- odejmowanie od poczatkowej klatki: ";
 	
 	short substractionType;
 	cin>>substractionType;
+	float firstTimeOfLive;
 	if (substractionType==0)
 	{
 		cout<<"Co ile sekund zmieniać początkową klatkę?: ";
@@ -174,7 +175,8 @@ int main ()
 		//object of the new class- difference between following frames
 		FramesDifference difference=FramesDifference
 			(olderFrameConv, youngerFrameConv, firstFrameConv, 
-				scenario, txtExport, substractionType, ifWeights, typeOfSum, firstTimeOfLive);
+				scenario, txtExport, substractionType, ifWeights, 
+					typeOfSum, firstTimeOfLive);
 		
 			//youngerFrame/*Conv*/.copyTo(olderFrame/*Conv*/);
 		youngerFrameConv.copyTo(olderFrameConv);
