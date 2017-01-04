@@ -2,15 +2,8 @@
 
 Mat FramesDifference::GaussBlurScenario(Mat minued, Mat young)
 {
-	//Mat a, b, difference_helper;
-	//GaussianBlur(old, a, Size(21, 21), 0, 0);
-	//thresholding(a, a, 4, 255, THRESH_BINARY);
-	//GaussianBlur(young, b, Size(21, 21), 0, 0);
-	//thresholding(b, b, 4, 255, THRESH_BINARY);
-	//absdiff(a, b, difference_helper);
 	Mat difference_helper, difference_help;
 	absdiff(minued, young, difference_helper);
-	//difference_helper=old;
 	GaussianBlur(difference_helper, difference_help, Size(15, 15), 0, 0);
 	thresholding(difference_help, difference_help, (double)3, 255, THRESH_BINARY);
 	return difference_help;
@@ -21,7 +14,6 @@ Mat FramesDifference::MedianBlurScenario(Mat minued, Mat young)
 {
 	Mat difference_helper, difference_help;
 	absdiff(minued, young, difference_helper);
-	//difference_helper=old;
 	medianBlur(difference_helper, difference_help, 11);
 	thresholding(difference_help, difference_help, (short)5, 255, THRESH_BINARY);
 	return difference_help;
@@ -31,6 +23,7 @@ Mat FramesDifference::MedianBlurScenario(Mat minued, Mat young)
 Mat FramesDifference::BoxBlurScenario(Mat minued, Mat young)
 {
 	Mat difference_helper, difference_help;
+	//wszystkie if są do wycięcia w ostatecznej wersji programu
 	if ((ElapsedTime>=2.5)&&(ElapsedTime<=2.6))
 	{
 		//Histogram(old, "before2");
@@ -63,7 +56,6 @@ Mat FramesDifference::DilatBlurScenario(Mat minued, Mat young)
 {
 	Mat difference_helper, difference_help, difference_help2;
 	absdiff(minued, young, difference_helper);
-	//difference_helper=old;
 	erode(difference_helper, difference_help, Mat(), Point(-1,-1), 1, BORDER_CONSTANT, morphologyDefaultBorderValue());
 	dilate(difference_help, difference_help2, Mat(), Point(-1,-1), 1, BORDER_CONSTANT, morphologyDefaultBorderValue());
 	thresholding(difference_help2, difference_help2, (short)7, 255, THRESH_BINARY);
@@ -74,7 +66,6 @@ Mat FramesDifference::SobelBlurScenario(Mat minued, Mat young)
 {
 	Mat difference_helper, difference_help, difference_help2, difference_help3,difference_help4, difference_help5;
 	absdiff(minued, young, difference_helper);
-	//difference_helper=old;
 	boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
 	thresholding(difference_help, difference_help, (short)5, 255, THRESH_BINARY);
 	erode(difference_help, difference_help2, Mat()/*Mat(3, 3, difference_help.type())*/, Point(-1,-1), 1, BORDER_CONSTANT, morphologyDefaultBorderValue());
@@ -91,7 +82,6 @@ Mat FramesDifference::ThresBoxThresScenario(Mat minued, Mat young)
 {
 	Mat difference_helper, difference_help, difference_help2, difference_help3;
 	absdiff(minued, young, difference_helper);
-	//difference_helper=old;
 	thresholding(difference_helper, difference_helper, (double)3, 255, THRESH_TOZERO);
 	boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
 	thresholding(difference_help, difference_help, (double)10, 255, THRESH_BINARY);
@@ -100,6 +90,7 @@ Mat FramesDifference::ThresBoxThresScenario(Mat minued, Mat young)
 	return difference_help3;
 }
 #if 0
+//bardzo kiepski pomysł, do wyrzucenia z ostatecznej wersji programu
 Mat FramesDifference::HistoryScenario(Mat old, Mat young)
 {
 	Mat difference_helper, difference_help;
@@ -110,554 +101,92 @@ Mat FramesDifference::HistoryScenario(Mat old, Mat young)
 	thresholding(difference_helper, difference_helper, (short)30, 255, THRESH_BINARY);
 	return difference_helper;
 }
-
-Mat FramesDifference::WeightsScenario(Mat old, Mat young)
-{
-	Mat difference_helper, difference_help, difference_help2;
-	absdiff(old, young, difference_helper);
-	//difference_helper=old;
-	//difference_help=WeightsMatrixSecond(difference_helper);	
-	//thresholding(difference_helper, difference_helper, (double)1, 255, THRESH_BINARY);
-	//erode(difference_helper, difference_help, Mat(), Point(-1,-1), 3, BORDER_CONSTANT, morphologyDefaultBorderValue());
-	boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
-	thresholding(difference_help, difference_help, (double)12, 255, THRESH_BINARY);
-	return difference_help;
-}
-
-Mat FramesDifference::WeightsScenarioThird(Mat old, Mat young)
-{
-	Mat difference_helper, difference_help, difference_help2;
-	absdiff(old, young, difference_helper);
-	//difference_helper=old;
-	//difference_help=WeightsMatrixThird(difference_helper);	
-	//thresholding(difference_helper, difference_helper, (double)1, 255, THRESH_BINARY);
-	//erode(difference_helper, difference_help, Mat(), Point(-1,-1), 3, BORDER_CONSTANT, morphologyDefaultBorderValue());
-	boxFilter(difference_helper, difference_help, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
-	thresholding(difference_help, difference_help, (double)3.5, 255, THRESH_BINARY);
-	return difference_help;
-}
-
-Mat FramesDifference::WeightsScenarioFourth(Mat old, Mat young)
-{
-	Mat difference_helper, difference_help, difference_help2;
-	absdiff(old, young, difference_helper);
-	//difference_helper=old;
-	difference_help=WeightsMatrixFourth(difference_helper);	
-	//thresholding(difference_helper, difference_helper, (double)1, 255, THRESH_BINARY);
-	//erode(difference_helper, difference_help, Mat(), Point(-1,-1), 3, BORDER_CONSTANT, morphologyDefaultBorderValue());
-	boxFilter(difference_help, difference_help2, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
-	//difference_helper=WeightsMatrixFourth(difference_help);	
-	thresholding(difference_help2, difference_help2, (double)4, 255, THRESH_BINARY);
-	return difference_help2;
-}
 #endif
-Mat FramesDifference::BoxBlurScenarioLiveWeights(Mat minued, Mat young, Mat old)
+
+Mat FramesDifference::GaussBlurScenarioLiveWeightsColRow(Mat minued, Mat young, Mat old)
 {
 	Mat difference_helper, difference_help, difference_help2;
 	absdiff(minued, young, difference_helper);
-	//difference_helper=old;
-	difference_help=WeightsMatrix(old, young);
+	difference_help=WeightsMatrix(difference_helper, old, young);
+	GaussianBlur(difference_help, difference_help2, Size(15, 15), 0, 0);
+	thresholding(difference_help2, difference_help2, (double)3, 255, THRESH_BINARY);
+	return difference_help2;
+}
+
+Mat FramesDifference::BoxBlurScenarioLiveWeightsColRow(Mat minued, Mat young, Mat old)
+{
+	Mat difference_helper, difference_help, difference_help2;
+	absdiff(minued, young, difference_helper);
+	difference_help=WeightsMatrix(difference_helper, old, young);
 	boxFilter(difference_help, difference_help2, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
 	thresholding(difference_help2, difference_help2, (double)2, 255, THRESH_BINARY);
 	return difference_help2;
 }
 
-Mat FramesDifference::BoxBlurScenarioDelayedWeights(Mat minued, Mat young, Mat first, float firstTimeOfLive)
+Mat FramesDifference::GaussBlurScenarioLiveWeightsEachPix(Mat minued, Mat young, Mat old)
+{
+	Mat difference_helper, difference_help, difference_help2;
+	absdiff(minued, young, difference_helper);
+	difference_help=WeightsMatrixSecond(difference_helper, old, young);
+	GaussianBlur(difference_help, difference_help2, Size(15, 15), 0, 0);
+	thresholding(difference_help2, difference_help2, (double)3, 255, THRESH_BINARY);
+	return difference_help2;
+}
+
+Mat FramesDifference::BoxBlurScenarioLiveWeightsEachPix(Mat minued, Mat young, Mat old)
+{
+	Mat difference_helper, difference_help, difference_help2;
+	absdiff(minued, young, difference_helper);
+	difference_help=WeightsMatrixSecond(difference_helper, old, young);
+	boxFilter(difference_help, difference_help2, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
+	thresholding(difference_help2, difference_help2, (double)2, 255, THRESH_BINARY);
+	return difference_help2;
+}
+
+Mat FramesDifference::GaussBlurScenarioDelayedWeightsAreas(Mat minued, Mat young, Mat first, float firstTimeOfLive)
 {
 	Mat difference_helper, difference_help, difference_help2, difference_help3;
-	//float *weights;
 	short yDist, xDist;
 	float piksOnYDist, piksOnXDist;
 	absdiff(minued, young, difference_helper);
-	//difference_helper=old;
-	difference_help=WeightsMatrixFourth(first, young, yDist, xDist, piksOnYDist, piksOnXDist, firstTimeOfLive);
-	boxFilter(difference_help, difference_help2, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
-	thresholding(difference_help2, difference_help2, (double)3, 255, THRESH_BINARY);
-	young.copyTo(difference_help2); //to see rectangles on real video
+	difference_help=WeightsMatrixFourth(difference_helper, first, young, yDist, xDist, piksOnYDist, piksOnXDist, firstTimeOfLive);
+	GaussianBlur(difference_help, difference_help2, Size(15, 15), 0, 0);
+	thresholding(difference_help2, difference_help2, (double)3.5, 255, THRESH_BINARY);
+	//young.copyTo(difference_help2); //to see rectangles on real video, you can comment it
 	difference_help3=selectHighestArea(difference_help2, Weights, yDist, xDist, piksOnYDist, piksOnXDist);
 	return difference_help3;
 }
 
-Mat FramesDifference::HistoryMatrix(Mat frame)
+Mat FramesDifference::BoxBlurScenarioDelayedWeightsAreas(Mat minued, Mat young, Mat first, float firstTimeOfLive)
 {
-	Mat weights;
-	if (ElapsedTime==0)
-	{
-		//weights=Mat(frame.rows, frame.cols, CV_32FC1);
-		weights=frame;
-	}
-	else
-	{
-		weights=weights/2+frame/2;
-	}
-	
-	return weights;
+	Mat difference_helper, difference_help, difference_help2, difference_help3;
+	short yDist, xDist;
+	float piksOnYDist, piksOnXDist;
+	absdiff(minued, young, difference_helper);
+	difference_help=WeightsMatrixFourth(difference_helper, first, young, yDist, xDist, piksOnYDist, piksOnXDist, firstTimeOfLive);
+	boxFilter(difference_help, difference_help2, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
+	thresholding(difference_help2, difference_help2, (double)4, 255, THRESH_BINARY);
+	//young.copyTo(difference_help2); //to see rectangles on real video, you can comment it
+	difference_help3=selectHighestArea(difference_help2, Weights, yDist, xDist, piksOnYDist, piksOnXDist);
+	return difference_help3;
 }
 
-Mat FramesDifference::WeightsMatrix(Mat old, Mat young)
+Mat FramesDifference::GaussBlurScenarioDelayedWeightsEachPix(Mat minued, Mat young, Mat first, float firstTimeOfLive)
 {
-	Mat difference;
-	absdiff(old, young, difference);
-	if (ElapsedTime==0)
-	{
-		//weights=Mat(frame.rows, frame.cols, CV_32FC1);
-		//colsWeights=frame.row(1);
-		//rowsWeights=frame.col(1);
-		//colsWeights=1;
-		//rowsWeights=1;
-		colsWeights=new float[difference.rows];
-		rowsWeights=new float[difference.cols];
-		for (int i=0; i<difference.rows; i++)
-			colsWeights[i]=1;
-		for (int i=0; i<difference.cols; i++)
-			rowsWeights[i]=1;	
-		//cout<<"uwaga!"<<colsWeights.rows<<"\t";
-		//cout<<colsWeights.cols<<endl;
-		//cout<<"uwaga!"<<rowsWeights.rows<<"\t";
-		//cout<<rowsWeights.cols<<endl;
-	}
-	else
-	{
-		int colMax=0, rowMax=0;
-		float colTab[difference.rows]={0}, rowTab[difference.cols]={0};
-		for (int i=0; i<difference.rows; i++)
-		{
-			for (int j=0; j<difference.cols; j++)
-			{
-				colTab[i]+=(float)difference.at<uchar>(i,j);
-				//cout<<"!!!"<<colTab[i]<<"!!"<<endl;
-				//if (i==478) cout<<"! "<<(float)frame.at<uchar>(i, j)<<"! ";
-			}
-			if (colTab[i]>colMax) colMax=colTab[i];
-			//if (i==478) cout<<"@ "<<colTab[i]<<" @ ";
-			//cout<<"! "<<(float)frame.at<uchar>(638, 478)<<"! ";
-		}
-		for (int i=0; i<difference.rows; i++)
-		{
-			colsWeights[i]+=(colTab[i]/colMax);
-			colsWeights[i]/=2;
-			//cout<<"@ "<<colsWeights[i]<<" @ ";
-		}
-		
-		for (int i=0; i<difference.cols; i++)
-		{
-			for (int j=0; j<difference.rows; j++)
-			{
-				rowTab[i]+=(float)difference.at<uchar>(j,i);	
-			}
-			if (rowTab[i]>rowMax) rowMax=rowTab[i];
-		}
-		//cout<<"!!!!"<<endl;
-		for (int i=0; i<difference.cols; i++)
-		{
-			rowsWeights[i]+=(rowTab[i]/rowMax);
-			rowsWeights[i]/=2;
-			//cout<<rowsWeights[i]<<" "<<i<<" ";
-		}
-		//cout<<"!!!!"<<endl;
-		//weights=weights/2+frame/2;
-	}
-	return multiply(difference, colsWeights, rowsWeights);
+	Mat difference_helper, difference_help, difference_help2;
+	absdiff(minued, young, difference_helper);
+	difference_help=WeightsMatrixThird(difference_helper, first, young, firstTimeOfLive);
+	GaussianBlur(difference_help, difference_help2, Size(15, 15), 0, 0);
+	thresholding(difference_help2, difference_help2, (double)3, 255, THRESH_BINARY);
+	return difference_help2;
 }
 
-Mat FramesDifference::WeightsMatrixSecond(Mat frame)
+Mat FramesDifference::BoxBlurScenarioDelayedWeightsEachPix(Mat minued, Mat young, Mat first, float firstTimeOfLive)
 {
-	int amount=frame.rows*frame.cols;
-	if (ElapsedTime==0)
-	{
-		//weights=Mat(frame.rows, frame.cols, CV_32FC1);
-		//colsWeights=frame.row(1);
-		//rowsWeights=frame.col(1);
-		//colsWeights=1;
-		//rowsWeights=1;
-		Weights=new float[amount];
-		for (int i=0; i<amount; i++)
-			Weights[i]=1;
-		//cout<<"uwaga!"<<colsWeights.rows<<"\t";
-		//cout<<colsWeights.cols<<endl;
-		//cout<<"uwaga!"<<rowsWeights.rows<<"\t";
-		//cout<<rowsWeights.cols<<endl;
-		cout<<"hooop";
-	}
-	else
-	{
-		//int colMax=0, rowMax=0;
-		int max=0;
-		float tab[amount]={0};
-		//float colTab[frame.rows]={0}, rowTab[frame.cols]={0};
-		for (int i=0; i<frame.rows; i++)
-		{
-			for (int j=0; j<frame.cols; j++)
-			{
-				tab[i*frame.cols+j]=(float)frame.at<uchar>(i,j);
-				if (tab[i*frame.cols+j]>max) max=tab[i*frame.cols+j];
-				//cout<<"!!!"<<colTab[i]<<"!!"<<endl;
-				//if (i==478) cout<<"! "<<(float)frame.at<uchar>(i, j)<<"! ";
-			}
-			//if (tab[i]>colMax) colMax=colTab[i];
-			//if (i==478) cout<<"@ "<<colTab[i]<<" @ ";
-			//cout<<"! "<<(float)frame.at<uchar>(638, 478)<<"! ";
-		}
-		cout<<"max"<<max;
-		for (int i=0; i<amount; i++)
-		{
-			Weights[i]*=2;
-			Weights[i]+=(tab[i]/max);
-			Weights[i]/=3;
-			//cout<<" # "<<Weights[i];
-		}
-		#if 0
-		float maxim=0;
-		for (int i=0; i<amount; i++)
-		{
-			if (Weights[i]>maxim)
-				maxim=Weights[i];
-		}
-		float minim=1;
-		for (int i=0; i<amount; i++)
-		{
-			if (Weights[i]<minim)
-				minim=Weights[i];
-		}
-		cout<<"maxim "<<maxim;
-		cout<<" minim "<<minim;
-		
-		for (int i=0; i<frame.rows; i++)
-		{
-			colsWeights[i]+=(colTab[i]/colMax);
-			colsWeights[i]/=2;
-			//cout<<"@ "<<colsWeights[i]<<" @ ";
-		}
-		
-		for (int i=0; i<frame.cols; i++)
-		{
-			for (int j=0; j<frame.rows; j++)
-			{
-				rowTab[i]+=(float)frame.at<uchar>(j,i);	
-			}
-			if (rowTab[i]>rowMax) rowMax=rowTab[i];
-		}
-		//cout<<"!!!!"<<endl;
-		for (int i=0; i<frame.cols; i++)
-		{
-			rowsWeights[i]+=(rowTab[i]/rowMax);
-			rowsWeights[i]/=2;
-			//cout<<rowsWeights[i]<<" "<<i<<" ";
-		}
-		//cout<<"!!!!"<<endl;
-		//weights=weights/2+frame/2;
-		#endif
-	}
-	return multiply(frame, Weights);
-}
-
-Mat FramesDifference::WeightsMatrixThird(Mat frame)
-{
-	int amount=frame.rows*frame.cols;
-	static int nr=1;
-	if (ElapsedTime==0)
-	{
-		//weights=Mat(frame.rows, frame.cols, CV_32FC1);
-		//colsWeights=frame.row(1);
-		//rowsWeights=frame.col(1);
-		//colsWeights=1;
-		//rowsWeights=1;
-		Weights=new float[amount];
-		for (int i=0; i<amount; i++)
-			Weights[i]=1;
-		//cout<<"uwaga!"<<colsWeights.rows<<"\t";
-		//cout<<colsWeights.cols<<endl;
-		//cout<<"uwaga!"<<rowsWeights.rows<<"\t";
-		//cout<<rowsWeights.cols<<endl;
-		cout<<"hooop";
-	}
-	else
-	{
-		//int colMax=0, rowMax=0;
-		int max=0;
-		float tab[amount]={0};
-		//float colTab[frame.rows]={0}, rowTab[frame.cols]={0};
-		for (int i=0; i<frame.rows; i++)
-		{
-			for (int j=0; j<frame.cols; j++)
-			{
-				if (tab[i*frame.cols+j]<(float)frame.at<uchar>(i,j))
-				{
-					tab[i*frame.cols+j]=(float)frame.at<uchar>(i,j);
-					if (tab[i*frame.cols+j]>max) max=tab[i*frame.cols+j];
-				}
-				//cout<<"!!!"<<colTab[i]<<"!!"<<endl;
-				//if (i==478) cout<<"! "<<(float)frame.at<uchar>(i, j)<<"! ";
-			}
-			//if (tab[i]>colMax) colMax=colTab[i];
-			//if (i==478) cout<<"@ "<<colTab[i]<<" @ ";
-			//cout<<"! "<<(float)frame.at<uchar>(638, 478)<<"! ";
-		}
-		cout<<"max"<<max;
-		cout<<"@ "<<nr<<endl;
-		if(FramesDifference::ElapsedTime>=1*nr)
-		{
-			for (int i=0; i<amount; i++)
-			{
-				Weights[i]*=5;
-				Weights[i]+=(tab[i]/max);
-				Weights[i]/=6;
-				//cout<<" # "<<Weights[i];
-			}
-			nr++;
-			if (nr==31)
-			{
-				ofstream plik("wagi.txt", ios::app);
-				for (int j=0; j<frame.rows; j++)
-				{
-					for (int i=0; i<frame.cols; i++)
-						plik << Weights[j*frame.cols+i]<<"\t";// <<"\t"<< ((float)nonZero/numberOfPixels) << endl; 
-					plik<<"\n";
-				}
-				plik.close();
-				//cout<<Weights[i]<<"\t";
-			}
-		}
-		cout<<" # "<<Weights[220];
-		#if 0
-		float maxim=0;
-		for (int i=0; i<amount; i++)
-		{
-			if (Weights[i]>maxim)
-				maxim=Weights[i];
-		}
-		float minim=1;
-		for (int i=0; i<amount; i++)
-		{
-			if (Weights[i]<minim)
-				minim=Weights[i];
-		}
-		cout<<"maxim "<<maxim;
-		cout<<" minim "<<minim;
-		
-		for (int i=0; i<frame.rows; i++)
-		{
-			colsWeights[i]+=(colTab[i]/colMax);
-			colsWeights[i]/=2;
-			//cout<<"@ "<<colsWeights[i]<<" @ ";
-		}
-		
-		for (int i=0; i<frame.cols; i++)
-		{
-			for (int j=0; j<frame.rows; j++)
-			{
-				rowTab[i]+=(float)frame.at<uchar>(j,i);	
-			}
-			if (rowTab[i]>rowMax) rowMax=rowTab[i];
-		}
-		//cout<<"!!!!"<<endl;
-		for (int i=0; i<frame.cols; i++)
-		{
-			rowsWeights[i]+=(rowTab[i]/rowMax);
-			rowsWeights[i]/=2;
-			//cout<<rowsWeights[i]<<" "<<i<<" ";
-		}
-		//cout<<"!!!!"<<endl;
-		//weights=weights/2+frame/2;
-		#endif
-	}
-	return multiply(frame, Weights);
-}
-
-//w każdym z kwadratów o wymiarach 5x5cm sumujemy piksele różnicy
-//im większa suma, tym większa waga obszaru
-Mat FramesDifference::WeightsMatrixFourth(Mat first, Mat young, short& yDistHelp, short& xDistHelp, float& piksOnYDist, float& piksOnXDist, float firstTimeOfLive)//(Mat first, Mat young)
-{
-	Mat difference;
-	absdiff(first, young, difference);
-	const short xDist=24, yDist=12;
-	xDistHelp=xDist;
-	yDistHelp=yDist;
-	//float piksOnXDist=(float)difference.cols/xDist;
-	piksOnXDist=(float)difference.cols/xDist;
-	//float piksOnYDist=(float)difference.rows/yDist;
-	piksOnYDist=(float)difference.rows/yDist;
-	const int amount=xDist*yDist;//frame.rows*frame.cols;
-	cout<<"amount: "<<amount<<endl;
-	static int nr=1;
-	if (ElapsedTime==0)
-	{
-		//weights=Mat(frame.rows, frame.cols, CV_32FC1);
-		//colsWeights=frame.row(1);
-		//rowsWeights=frame.col(1);
-		//colsWeights=1;
-		//rowsWeights=1;
-		Weights=new float[amount];
-		for (int i=0; i<amount; i++)
-			Weights[i]=1.0;
-		//cout<<"wagi!!"<<sizeof(Weights);
-		//cout<<"uwaga!"<<Weights.rows<<"\t";
-		//cout<<Weights.cols<<endl;
-		//cout<<"uwaga!"<<rowsWeights.rows<<"\t";
-		//cout<<rowsWeights.cols<<endl;
-		cout<<"hooop";
-	}
-	else
-	{
-		//int colMax=0, rowMax=0;
-		static float max=0;
-		float tab[amount]={0};
-		static float tab2[amount];
-		//float colTab[frame.rows]={0}, rowTab[frame.cols]={0};
-		for (int i=0; i<yDist; i++)
-		{
-			for (int j=0; j<xDist; j++)
-			{
-				for (int k=0; k<piksOnYDist; k++)
-				{
-					for (int l=0; l<piksOnXDist; l++)
-					{
-						tab[i*xDist+j]+=(float)difference.at<uchar>(k+i*piksOnYDist,l+j*piksOnXDist);
-					}
-				}
-			}
-		}
-		for (int i=0; i<yDist; i++)
-		{
-			for (int j=0; j<xDist; j++)
-			{
-				if (tab[i*xDist+j]>tab2[i*xDist+j])
-				{
-					tab2[i*xDist+j]=tab[i*xDist+j];
-					if (tab2[i*xDist+j]>=max) max=tab2[i*xDist+j];
-				}
-			}
-		}
-		if(FramesDifference::ElapsedTime>=firstTimeOfLive*nr)
-		{
-			cout<<"!!"<<sizeof(tab2)<<"!!!"<<sizeof(Weights)<<"!!!!"<<amount;
-			for (int i=0; i<(amount); i++)
-			{
-				//cout<<i<<"\t";
-				Weights[i]*=5;
-				Weights[i]+=(tab2[i]/max);
-				Weights[i]/=6;
-				//Weights[i]*=2;
-				//cout<<" # "<<Weights[i];
-				cout<<Weights[i]<<"\t";//<<tab2[i]/max<<"\t";
-				//cout<<"wwww: "<<Weights[24*12]<<endl;
-				tab2[i]=0;
-			}
-			cout<<"wwww: "<<Weights[24*12]<<endl;
-			/*Weights[17]*=2;
-			Weights[19]*=2;
-			Weights[127]*=2;
-			Weights[128]*=2;
-			Weights[154]*=2;
-			Weights[163]*=2;
-			Weights[190]*=2;
-			Weights[283]*=2;
-			Weights[284]*=2;
-			*/nr++;
-			max=0;
-			//#if 0
-			if (nr==31)
-			{
-				ofstream plik("wagi4.txt", ios::app);
-				for (int j=0; j<yDist; j++)
-				{
-					for (int i=0; i<xDist; i++)
-						//cout<<Weights[j*xDist+i]<<"\t";
-						plik << Weights[j*xDist+i]<<"\t";// <<"\t"<< ((float)nonZero/numberOfPixels) << endl; 
-					//cout<<"\n";
-					plik<<"\n";
-				}
-				plik.close();
-				//cout<<Weights[i]<<"\t";
-			}
-			//#endif
-		}
-		#if 0
-		for (int i=0; i<difference.rows; i++)
-		{
-			for (int j=0; j<difference.cols; j++)
-			{
-				if (tab[i*difference.cols+j]<(float)difference.at<uchar>(i,j))
-				{
-					tab[i*difference.cols+j]=(float)difference.at<uchar>(i,j);
-					if (tab[i*difference.cols+j]>max) max=tab[i*difference.cols+j];
-				}
-				//cout<<"!!!"<<colTab[i]<<"!!"<<endl;
-				//if (i==478) cout<<"! "<<(float)frame.at<uchar>(i, j)<<"! ";
-			}
-			//if (tab[i]>colMax) colMax=colTab[i];
-			//if (i==478) cout<<"@ "<<colTab[i]<<" @ ";
-			//cout<<"! "<<(float)frame.at<uchar>(638, 478)<<"! ";
-		}
-		cout<<"max"<<max;
-		cout<<"@ "<<nr<<endl;
-		if(FramesDifference::ElapsedTime>=1*nr)
-		{
-			for (int i=0; i<amount; i++)
-			{
-				//Weights[i]*=5;
-				Weights[i]+=(tab[i]/max);
-				Weights[i]/=2;
-				//cout<<" # "<<Weights[i];
-			}
-			nr++;
-			if (nr==31)
-			{
-				ofstream plik("wagi.txt", ios::app);
-				for (int j=0; j<difference.rows; j++)
-				{
-					for (int i=0; i<difference.cols; i++)
-						plik << Weights[j*difference.cols+i]<<"\t";// <<"\t"<< ((float)nonZero/numberOfPixels) << endl; 
-					plik<<"\n";
-				}
-				plik.close();
-				//cout<<Weights[i]<<"\t";
-			}
-		}
-		cout<<" # "<<Weights[220];
-		#endif
-		#if 0
-		float maxim=0;
-		for (int i=0; i<amount; i++)
-		{
-			if (Weights[i]>maxim)
-				maxim=Weights[i];
-		}
-		float minim=1;
-		for (int i=0; i<amount; i++)
-		{
-			if (Weights[i]<minim)
-				minim=Weights[i];
-		}
-		cout<<"maxim "<<maxim;
-		cout<<" minim "<<minim;
-		
-		for (int i=0; i<frame.rows; i++)
-		{
-			colsWeights[i]+=(colTab[i]/colMax);
-			colsWeights[i]/=2;
-			//cout<<"@ "<<colsWeights[i]<<" @ ";
-		}
-		
-		for (int i=0; i<frame.cols; i++)
-		{
-			for (int j=0; j<frame.rows; j++)
-			{
-				rowTab[i]+=(float)frame.at<uchar>(j,i);	
-			}
-			if (rowTab[i]>rowMax) rowMax=rowTab[i];
-		}
-		//cout<<"!!!!"<<endl;
-		for (int i=0; i<frame.cols; i++)
-		{
-			rowsWeights[i]+=(rowTab[i]/rowMax);
-			rowsWeights[i]/=2;
-			//cout<<rowsWeights[i]<<" "<<i<<" ";
-		}
-		//cout<<"!!!!"<<endl;
-		//weights=weights/2+frame/2;
-		#endif
-	}
-	cout<<"\tmnozenie\t";
-	return multiply(difference, Weights, yDist, xDist, piksOnYDist, piksOnXDist);
+	Mat difference_helper, difference_help, difference_help2;
+	absdiff(minued, young, difference_helper);
+	difference_help=WeightsMatrixThird(difference_helper, first, young, firstTimeOfLive);
+	boxFilter(difference_help, difference_help2, -1, Size(13, 13), Point(-1,-1), true, BORDER_DEFAULT );
+	thresholding(difference_help2, difference_help2, (double)3, 255, THRESH_BINARY);
+	return difference_help2;
 }

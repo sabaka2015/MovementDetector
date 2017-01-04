@@ -2,21 +2,17 @@
 
 short FramesDifference::counterZero=0;
 float FramesDifference::ElapsedTime=0;
-//Mat FramesDifference::colsWeights=Mat();
-//Mat FramesDifference::rowsWeights=Mat();
 
-FramesDifference::FramesDifference(Mat old, Mat young, Mat first, int scenario, string txtExport, short substractionType, bool ifWeights, short typeOfSum, float firstTimeOfLive)
+FramesDifference::FramesDifference(Mat old, Mat young, Mat first,
+			int scenario, string txtExport, short substractionType,
+			 bool ifWeights, short typeOfSum, float firstTimeOfLive)
 {
-	/*if (ElapsedTime==0.924)
-	ofstream plik(txtExp, ios::app);
-	plik << ElapsedTime <<"\t"<< ((float)nonZero/numberOfPixels) << endl; 
-	plik.close();
-	*/
 	Mat minued;
 	if (substractionType)
 		minued=old;
 	else
 		minued=first;
+	
 	if (ifWeights)
 	{
 		if (typeOfSum)
@@ -24,7 +20,7 @@ FramesDifference::FramesDifference(Mat old, Mat young, Mat first, int scenario, 
 		else
 			scenario+=100;
 	}
-	cout<<"scenariusz: "<<scenario<<endl;
+
 	switch (scenario)
 	{
 		//without weights
@@ -46,93 +42,56 @@ FramesDifference::FramesDifference(Mat old, Mat young, Mat first, int scenario, 
 		case 6:
 			difference=ThresBoxThresScenario(minued, young);
 			break;
-		/*case 7:
-			difference=HistoryScenario(old, young);
-			break;
-		case 8:
-			difference=WeightsScenario(old, young);
-			break;
-		case 9:
-			difference=WeightsScenarioThird(old, young);
-			break;
-		case 10:
-			difference=WeightsScenarioFourth(old, young);
-			break;
-		*/
+
 		//with weights "live"
-		
 		case 11:
-			cout<<"Brak scenariusza, koniec programu!";
-			//difference=GaussBlurScenario(minued, young, old);
-			break;
-		case 12:
-			cout<<"Brak scenariusza, koniec programu!";
-			//difference=MedianBlurScenario(minued, young, old);
+			difference=GaussBlurScenarioLiveWeightsColRow(minued, young, old);
 			break;
 		case 13:
-			difference=BoxBlurScenarioLiveWeights(minued, young, old);
+			difference=BoxBlurScenarioLiveWeightsColRow(minued, young, old);
 			break;
-		case 14:
-			cout<<"Brak scenariusza, koniec programu!";
-			//difference=DilatBlurScenario(minued, young, old);
+		case 17:
+			difference=GaussBlurScenarioLiveWeightsEachPix(minued, young, old);
 			break;
-		case 15:
-			cout<<"Brak scenariusza, koniec programu!";
-			//difference=SobelBlurScenario(minued, young, old);
-			break;
-		case 16:
-			cout<<"Brak scenariusza, koniec programu!";
-			//difference=ThresBoxThresScenario(minued, young, old);
+		case 19:
+			difference=BoxBlurScenarioLiveWeightsEachPix(minued, young, old);
 			break;
 			
 		//with delayed weights
 		case 101:
-			cout<<"Brak scenariusza, koniec programu!";
-			//difference=GaussBlurScenario(old, young);
-			break;
-		case 102:
-			cout<<"Brak scenariusza, koniec programu!";
-			//difference=MedianBlurScenario(old, young);
+			difference=GaussBlurScenarioDelayedWeightsAreas(minued, young,
+										first, firstTimeOfLive);
 			break;
 		case 103:
-			difference=BoxBlurScenarioDelayedWeights(minued, young, first, firstTimeOfLive);
+			difference=BoxBlurScenarioDelayedWeightsAreas(minued, young, 
+										first, firstTimeOfLive);
 			break;
-		case 104:
-			cout<<"Brak scenariusza, koniec programu!";
-			//difference=DilatBlurScenario(old, young);
+		case 107:
+			difference=GaussBlurScenarioDelayedWeightsEachPix(minued, young, 
+										first, firstTimeOfLive);
 			break;
-		case 105:
-			cout<<"Brak scenariusza, koniec programu!";
-			//difference=SobelBlurScenario(old, young);
-			break;
-		case 106:
-			cout<<"Brak scenariusza, koniec programu!";
-			//difference=ThresBoxThresScenario(old, young);
+		case 109:
+			difference=BoxBlurScenarioDelayedWeightsEachPix(minued, young, 
+										first, firstTimeOfLive);
 			break;
 	}
-	#if 0
-	Mat difference_helper;
-	Mat a, b;
-	GaussianBlur(old, a, Size(21, 21), 0, 0);
-	//thresholding(a, a, 4, 255, THRESH_BINARY);
-	GaussianBlur(young, b, Size(21, 21), 0, 0);
-	//thresholding(b, b, 4, 255, THRESH_BINARY);
-	absdiff(a, b, difference_helper);
-	//absdiff(old, young, difference_helper);
-	difference=difference_helper;
-	//difference_helper=old;
-	//GaussianBlur(difference_helper, difference, Size(21, 21), 0, 0);
-	thresholding(difference, difference, 3, 255, THRESH_BINARY);
-	#endif
+	
 	movingPixels(txtExport);
 }
 
-void FramesDifference::thresholding(Mat inImage, Mat outImage, short thres, double maxval, int type)
+//the value of threshold is equal to the short number
+void FramesDifference::thresholding(Mat inImage, Mat outImage, short thres, 
+											double maxval, int type)
 {
 	threshold(inImage, outImage, thres, maxval, type);
 }
 
-void FramesDifference::thresholding(Mat inImage, Mat outImage, double thres, double maxval, int type)
+//the value of threshold is equal to the double number
+//of standard deviation of a mean value
+//assumption, that the mean value is equal 0 
+//(it is true if there is not threshold before)
+void FramesDifference::thresholding(Mat inImage, Mat outImage, double thres,
+											double maxval, int type)
 {
 	float stdDeviation=0;
 	int amount=inImage.cols*inImage.rows;
@@ -149,15 +108,17 @@ void FramesDifference::thresholding(Mat inImage, Mat outImage, double thres, dou
 	threshold(inImage, outImage, (thres*stdDeviation), maxval, type);
 }
 
+//movement is detected if there are more than 0.07% non-zero pixels in frame
 void FramesDifference::movingPixels(string txtExport)
 {
-	//movement is detected if there are more than 0.07% non-zero pixels in frame
 	int nonZero=(countNonZero(difference));
 	int numberOfPixels=difference.cols*difference.rows;
+	//export data to the txt file
 	const char* txtExp = txtExport.c_str();
 	ofstream plik(txtExp, ios::app);
 	plik << ElapsedTime <<"\t"<< ((float)nonZero/numberOfPixels) << endl; 
 	plik.close();
+	//stwierdzenie wykrycia ruchu- można usunąć z ostatecznej wersji programu
 	if (nonZero>0.0007*numberOfPixels) 
 	{
 		movement=true;
@@ -172,11 +133,13 @@ void FramesDifference::movingPixels(string txtExport)
 		<<"\tmovement: \a"<<movement<<endl;
 }
 
+//można usunąć z ostatecznej wersji programu
 void FramesDifference::alarm()
 {
 	cout<<"ALARM!!!\a\a";
 }
 
+//można usunąć z ostatecznej wersji programu
 //this function is making a histogram from values in pixels in frame
 void FramesDifference::Histogram(Mat frame, string name)
 {
@@ -204,22 +167,16 @@ void FramesDifference::Histogram(Mat frame, string name)
 	system("gnuplot -p -e \"load 'skryptHist.txt'\"");
 }
 
-//to slow
+//to slow??
 Mat multiply (Mat frame, float* weights)
 {
-	//Mat result;
 	for (int i=0; i<frame.rows; i++)
 	{
 		for (int j=0; j<frame.cols; j++)
 		{
 			frame.at<uchar>(i,j)*=weights[i*frame.cols+j];
-			//result.at<uchar>(i,j)=frame.at<uchar>(i,j)*weights.at<uchar>(i,j);
-			//result.at<int>(i,j)=(int)frame.at<uchar>(i,j);
-			//cout<<i<<" "<<j<<" "<<result.at<int>(i,j)<<endl;
-			//cout<<"cos";
 		}
 	}
-	//cout<<"cos";
 	return frame;
 }
 	
@@ -227,12 +184,11 @@ Mat multiply (Mat frame, float* colsWeights, float* rowsWeights)
 {
 	for (int i=0; i<frame.cols; i++)
 	{
-		frame.col(i)*=colsWeights[i];//(float)colsWeights.at<uchar>(1,i);
-		//cout<<"!! "<<colsWeights.at<float>(1,i)<<"!! ";
+		frame.col(i)*=colsWeights[i];
 	}
 	for (int j=0; j<frame.rows; j++)
 	{
-		frame.row(j)*=rowsWeights[j];//(float)rowsWeights.at<uchar>(j,1);
+		frame.row(j)*=rowsWeights[j];
 	}
 	return frame;
 }
@@ -243,35 +199,21 @@ Mat multiply (Mat frame, float* weights, short yDist, short xDist, float piksOnY
 	{
 		for (int j=0; j<xDist; j++)
 		{
-			for (int l=0; l<piksOnXDist; l++/*int k=0; k<piksOnYDist; k++*/)
+			for (int l=0; l<piksOnXDist; l++)
 			{
-				for (int k=0; k<piksOnYDist; k++/*int l=0; l<piksOnXDist; l++*/)
+				for (int k=0; k<piksOnYDist; k++)
 				{
 					frame.at<uchar>(k+i*piksOnYDist, l+j*piksOnXDist)*=weights[i*xDist+j];
-					//tab[i*xDist+j]+=(float)frame.at<uchar>(k+i*yDist,l+j*xDist);
 				}
 			}
 		}
 	}
-	cout<<"\twymnozone\t";
-	//Mat result;
-	#if 0
-	for (int i=0; i<frame.rows; i++)
-	{
-		for (int j=0; j<frame.cols; j++)
-		{
-			frame.at<uchar>(i,j)*=weights[i*frame.cols+j];
-			//result.at<uchar>(i,j)=frame.at<uchar>(i,j)*weights.at<uchar>(i,j);
-			//result.at<int>(i,j)=(int)frame.at<uchar>(i,j);
-			//cout<<i<<" "<<j<<" "<<result.at<int>(i,j)<<endl;
-			//cout<<"cos";
-		}
-	}
-	//cout<<"cos";
-	#endif
-	return frame;//selectHighestArea (frame, weights, yDist, xDist, piksOnYDist, piksOnXDist);
+
+	return frame;
 }
 
+//work only for DelayedWeightsAreas scenarios
+//the highest areas are pointed
 Mat selectHighestArea (Mat frame, float* weights, short yDist, short xDist, float piksOnYDist, float piksOnXDist)
 {
 	float max=0;
