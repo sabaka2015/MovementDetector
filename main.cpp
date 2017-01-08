@@ -97,23 +97,26 @@ int main ()
 	int scenario;
 	cin>>scenario;
 	
-	if ((typeOfSum==0)&&(substractionType!=0))
+	if (ifWeights)
 	{
-		cout<<"Co ile sekund modyfikować współczynniki wagowe?: ";
-		cin>>firstTimeOfLive;
-		cout<<"0- współczynniki wagowe dla obszarów o rozmiarach ok 5x5cm"
-			"\n6- współczynniki wagowe dla każdego piksela : ";
-		short delayedWeightsType;
-		cin>>delayedWeightsType;
-		scenario+=delayedWeightsType;
-	}
-	else
-	{
-		cout<<"0- współczynniki wagowe dla kolumn i wierszy"
-			"\n6- dla każdego piksela : ";
-		short liveWeightsType;
-		cin>>liveWeightsType;
-		scenario+=liveWeightsType;
+		if ((typeOfSum==0)&&(substractionType!=0))
+		{
+			cout<<"Co ile sekund modyfikować współczynniki wagowe?: ";
+			cin>>firstTimeOfLive;
+			cout<<"0- współczynniki wagowe dla obszarów o rozmiarach ok 5x5cm"
+				"\n6- współczynniki wagowe dla każdego piksela : ";
+			short delayedWeightsType;
+			cin>>delayedWeightsType;
+			scenario+=delayedWeightsType;
+		}
+		else
+		{
+			cout<<"0- współczynniki wagowe dla kolumn i wierszy"
+				"\n6- dla każdego piksela : ";
+			short liveWeightsType;
+			cin>>liveWeightsType;
+			scenario+=liveWeightsType;
+		}
 	}
 	short ifFirst=substractionType*typeOfSum;
 	

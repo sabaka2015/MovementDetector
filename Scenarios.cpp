@@ -4,8 +4,8 @@ Mat FramesDifference::GaussBlurScenario(Mat minued, Mat young)
 {
 	Mat difference_helper, difference_help;
 	absdiff(minued, young, difference_helper);
-	GaussianBlur(difference_helper, difference_help, Size(15, 15), 0, 0);
-	thresholding(difference_help, difference_help, (double)3, 255, THRESH_BINARY);
+	GaussianBlur(difference_helper, difference_help, Size(23, 23), 0, 0);
+	thresholding(difference_help, difference_help, (short)6, 255, THRESH_BINARY);
 	return difference_help;
 }
 

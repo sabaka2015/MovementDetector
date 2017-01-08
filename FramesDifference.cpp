@@ -25,52 +25,66 @@ FramesDifference::FramesDifference(Mat old, Mat young, Mat first,
 	{
 		//without weights
 		case 1:
+			cout<<"GaussBlurScenario\n";
 			difference=GaussBlurScenario(minued, young);
 			break;
 		case 2:
+			cout<<"MedianBlurScenario\n";
 			difference=MedianBlurScenario(minued, young);
 			break;
 		case 3:
+			cout<<"BoxBlurScenario\n";
 			difference=BoxBlurScenario(minued, young);
 			break;
 		case 4:
+			cout<<"DilatBlurScenario\n";
 			difference=DilatBlurScenario(minued, young);
 			break;
 		case 5:
+			cout<<"SobelBlurScenario\n";
 			difference=SobelBlurScenario(minued, young);
 			break;
 		case 6:
+			cout<<"ThresBoxThresScenario\n";
 			difference=ThresBoxThresScenario(minued, young);
 			break;
 
 		//with weights "live"
 		case 11:
+			cout<<"GaussBlurScenarioLiveWeightsColRow\n";
 			difference=GaussBlurScenarioLiveWeightsColRow(minued, young, old);
 			break;
 		case 13:
+			cout<<"BoxBlurScenarioLiveWeightsColRow\n";
 			difference=BoxBlurScenarioLiveWeightsColRow(minued, young, old);
 			break;
 		case 17:
+			cout<<"GaussBlurScenarioLiveWeightsEachPix\n";
 			difference=GaussBlurScenarioLiveWeightsEachPix(minued, young, old);
 			break;
 		case 19:
+			cout<<"BoxBlurScenarioLiveWeightsEachPix\n";
 			difference=BoxBlurScenarioLiveWeightsEachPix(minued, young, old);
 			break;
 			
 		//with delayed weights
 		case 101:
+			cout<<"GaussBlurScenarioDelayedWeightsAreas\n";
 			difference=GaussBlurScenarioDelayedWeightsAreas(minued, young,
 										first, firstTimeOfLive);
 			break;
 		case 103:
+			cout<<"BoxBlurScenarioDelayedWeightsAreas\n";
 			difference=BoxBlurScenarioDelayedWeightsAreas(minued, young, 
 										first, firstTimeOfLive);
 			break;
 		case 107:
+			cout<<"GaussBlurScenarioDelayedWeightsEachPix\n";
 			difference=GaussBlurScenarioDelayedWeightsEachPix(minued, young, 
 										first, firstTimeOfLive);
 			break;
 		case 109:
+			cout<<"BoxBlurScenarioDelayedWeightsEachPix\n";
 			difference=BoxBlurScenarioDelayedWeightsEachPix(minued, young, 
 										first, firstTimeOfLive);
 			break;
