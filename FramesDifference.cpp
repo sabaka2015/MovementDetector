@@ -48,6 +48,14 @@ FramesDifference::FramesDifference(Mat old, Mat young, Mat first,
 			cout<<"ThresBoxThresScenario\n";
 			difference=ThresBoxThresScenario(minued, young);
 			break;
+		case 7:
+			cout<<"CannyBlurScenario\n";
+			difference=CannyBlurScenario(minued, young);
+			break;
+		case 8:
+			cout<<"ThresholdScenario\n";
+			difference=ThresholdScenario(minued, young);
+			break;
 
 		//with weights "live"
 		case 11:
@@ -260,6 +268,43 @@ Mat selectHighestArea (Mat frame, float* weights, short yDist, short xDist, floa
 					rectangle(frame, Point(j*piksOnXDist, i*piksOnYDist), Point((j+1)*piksOnXDist, (i+1)*piksOnYDist), Scalar(255, 0, 0), 1, 8, 0);
 				}
 			}		
+		}
+	}	
+	return frame;
+}
+
+//printing weights on the frame
+Mat printWeights (Mat frame, float* weights, short yDist, short xDist, float piksOnYDist, float piksOnXDist)
+{
+	float max=0;
+	short xMax, yMax;
+	for (int i=0; i<yDist; i++)
+	{
+		for (int j=0; j<xDist; j++)
+		{
+			if (weights[i*xDist+j]>max)
+			{
+				max=weights[i*xDist+j];
+				xMax=j;
+				yMax=i;
+			}
+		}		
+	}	
+	rectangle(frame, Point(xMax*piksOnXDist, yMax*piksOnYDist), Point((xMax+1)*piksOnXDist, (yMax+1)*piksOnYDist), Scalar(255, 0, 0), 3, 8, 0);
+	
+	for (int i=0; i<yDist; i++)
+	{
+		for (int j=0; j<xDist; j++)
+		{
+			char str[20]  = "";
+			sprintf(str, "%.2f", weights[i*xDist+j]);
+			putText(frame, str, Point(j*piksOnXDist+2, (i+0.5)*piksOnYDist), FONT_HERSHEY_SIMPLEX, 0.3, Scalar(255, 0, 0), 1, 8, false );
+			if (weights[i*xDist+j]>(0.55*max))
+			{
+					rectangle(frame, Point(j*piksOnXDist, i*piksOnYDist), Point((j+1)*piksOnXDist, (i+1)*piksOnYDist), Scalar(255, 0, 0), 2, 8, 0);
+			}
+			else
+				rectangle(frame, Point(j*piksOnXDist, i*piksOnYDist), Point((j+1)*piksOnXDist, (i+1)*piksOnYDist), Scalar(255, 0, 0), 1, 8, 0);		
 		}
 	}	
 	return frame;

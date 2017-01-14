@@ -216,12 +216,19 @@ Mat FramesDifference::WeightsMatrixFourth(Mat frame, Mat first, Mat young, short
 		}
 		if(FramesDifference::ElapsedTime>=firstTimeOfLive*nr)
 		{
+			float WeightsMax=0;
 			for (int i=0; i<(amount); i++)
 			{
 				Weights[i]*=3;
 				Weights[i]+=(tab2[i]/max);
 				Weights[i]/=4;
 				tab2[i]=0;
+				if (Weights[i]>WeightsMax)
+					WeightsMax=Weights[i];
+			}
+			for (int i=0; i<(amount); i++)
+			{
+				Weights[i]/=WeightsMax;
 			}
 			nr++;
 			max=0;

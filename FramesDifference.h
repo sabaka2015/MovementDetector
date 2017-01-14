@@ -37,6 +37,8 @@ class FramesDifference
 	Mat DilatBlurScenario(Mat, Mat);
 	Mat SobelBlurScenario(Mat, Mat);
 	Mat ThresBoxThresScenario(Mat, Mat);
+	Mat CannyBlurScenario(Mat, Mat);
+	Mat ThresholdScenario(Mat, Mat);
 	Mat HistoryScenario(Mat, Mat);
 	
 	Mat WeightsScenario(Mat, Mat);
@@ -73,6 +75,7 @@ class FramesDifference
 
 
 Mat selectHighestArea (Mat, float*, short, short, float, float);
+Mat printWeights (Mat, float*, short, short, float, float);
 Mat multiply (Mat, float*);
 Mat multiply (Mat, float*, float*);
 Mat multiply (Mat, float*, short, short, float, float);

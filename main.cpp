@@ -93,7 +93,7 @@ int main ()
 		cout<<"\nWybierz scenariusz:\nGauss: 1 \nBox: 3: ";
 	else
 		cout<<"\nWybierz scenariusz:\nGauss: 1 \nMedian: 2\nBox: 3: \nDilat: 4" 
-				"\nSobel: 5 \nThresBoxThres: 6: ";
+				"\nSobel: 5 \nThresBoxThres: 6: \nCanny: 7 \nProgowanie: 8 ";
 	int scenario;
 	cin>>scenario;
 	
@@ -179,23 +179,24 @@ int main ()
 			writer<<difference.getDifference();
 		
 		//zapis ten fragment zostanie wyrzucony w ostatecznej wersji programu
-		#if 0
-		if (zapis2<='9')
+		//#if 0
+		if ((FramesDifference::ElapsedTime>=29.8)&&(FramesDifference::ElapsedTime<=29.9))
 		{
-			string plik="roznice/frodo2/thres8/frodo2_";
-			plik+=zapis2;//static_cast<char>(zapisanych);
-			plik+=zapis;
-			plik+=".jpg";
-			cout<<plik<<endl;
+			//string plik="roznice/frodo2/thres8/frodo2_";
+			//plik+=zapis2;//static_cast<char>(zapisanych);
+			//plik+=zapis;
+			//plik+=".jpg";
+			//cout<<plik<<endl;
+			string plik="boxWeights.jpg";
 			imwrite(plik, difference.getDifference()/*youngerFrame*/);
-			if (zapis<'9') zapis++;
-			else
-			{
-				zapis2++;
-				zapis='0';
-			}
+			//if (zapis<'9') zapis++;
+			//else
+			//{
+			//	zapis2++;
+			//	zapis='0';
+			//}
 		}
-		#endif
+		//#endif
 		//alarm raczej nie jest potrzebny, można wyrzucić w ostatecznej wersji programu
 		//alarm if time without movement is longer than 20s
 		if (FramesDifference::counterZero*framesDistance>=20000)
