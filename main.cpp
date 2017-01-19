@@ -151,8 +151,8 @@ int main ()
 	double framesDistance = 1000 / fps;
 	//creating a window
 	namedWindow("window", WINDOW_AUTOSIZE);
-	//char zapis='1';
-	//char zapis2='0';
+	char zapis='1';
+	char zapis2='0';
 	
 	VideoWriter writer (recordName, CV_FOURCC('M','J','P','G'),
 									fps, Size(640,480), false);
@@ -180,19 +180,19 @@ int main ()
 		
 		//zapis ten fragment zostanie wyrzucony w ostatecznej wersji programu
 		//#if 0
-		if ((FramesDifference::ElapsedTime>=29.8)&&(FramesDifference::ElapsedTime<=29.9))
+		if ((FramesDifference::ElapsedTime>=9.8)&&(FramesDifference::ElapsedTime<=10.7))
 		{
-			//string plik="roznice/frodo2/thres8/frodo2_";
-			//plik+=zapis2;//static_cast<char>(zapisanych);
+			string plik="wyniki/klatki/box/box_";
+			plik+=zapis2;//static_cast<char>(zapisanych);
 			//plik+=zapis;
-			//plik+=".jpg";
+			plik+=".jpg";
 			//cout<<plik<<endl;
-			string plik="boxWeights.jpg";
+			//string plik="boxWeights.jpg";
 			imwrite(plik, difference.getDifference()/*youngerFrame*/);
 			//if (zapis<'9') zapis++;
 			//else
 			//{
-			//	zapis2++;
+			zapis2++;
 			//	zapis='0';
 			//}
 		}
