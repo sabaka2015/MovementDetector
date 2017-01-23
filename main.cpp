@@ -158,11 +158,13 @@ int main ()
 									fps, Size(640,480), false);
 	
 	//a loop in which the video is analysing and printing in window
-	while (true)
+	while (arm.grab())
 	{
-		if(!arm.grab()) break;
+		//if(!arm.grab()) break;
+		//if(!(arm>>youngerFrame)) break;
+		arm.retrieve(youngerFrame);
 		arm>>youngerFrame;
-		
+		//arm>>youngerFrame;
 		//conversion from RGB to Gray scale
 		cvtColor(youngerFrame, youngerFrameConv, CV_RGB2GRAY);
 
@@ -179,11 +181,11 @@ int main ()
 			writer<<difference.getDifference();
 		
 		//zapis ten fragment zostanie wyrzucony w ostatecznej wersji programu
-		//#if 0
-		if ((FramesDifference::ElapsedTime>=9.8)&&(FramesDifference::ElapsedTime<=10.7))
+		#if 0
+		if ((FramesDifference::ElapsedTime>=34.8))//&&(FramesDifference::ElapsedTime<=10.7))
 		{
-			string plik="wyniki/klatki/box/box_";
-			plik+=zapis2;//static_cast<char>(zapisanych);
+			string plik="wagi_frodo1_nowe_10x32";
+			//plik+=zapis2;//static_cast<char>(zapisanych);
 			//plik+=zapis;
 			plik+=".jpg";
 			//cout<<plik<<endl;
@@ -196,7 +198,7 @@ int main ()
 			//	zapis='0';
 			//}
 		}
-		//#endif
+		#endif
 		//alarm raczej nie jest potrzebny, można wyrzucić w ostatecznej wersji programu
 		//alarm if time without movement is longer than 20s
 		if (FramesDifference::counterZero*framesDistance>=20000)

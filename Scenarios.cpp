@@ -188,13 +188,13 @@ Mat FramesDifference::GaussBlurScenarioDelayedWeightsAreas(Mat minued, Mat young
 	absdiff(minued, young, difference_helper);
 	difference_help=WeightsMatrixFourth(difference_helper, first, young, yDist, xDist, piksOnYDist, piksOnXDist, firstTimeOfLive);
 	GaussianBlur(difference_help, difference_help2, Size(23, 23), 0, 0);
-	thresholding(difference_help2, difference_help2, (short)5, 255, THRESH_BINARY);
+	thresholding(difference_help2, difference_help2, (short)3, 255, THRESH_BINARY);
 	//to see rectangles on real video, you can comment it
 	//young.copyTo(difference_help2); 
-	difference_help3=selectHighestArea(difference_help2, Weights, yDist, xDist, piksOnYDist, piksOnXDist);
+	//difference_help3=selectHighestArea(difference_help2, Weights, yDist, xDist, piksOnYDist, piksOnXDist);
 	//to print weights on real video, you can commit it
 	//difference_help3=printWeights(difference_help2, Weights, yDist, xDist, piksOnYDist, piksOnXDist);
-	thresholding(difference_help3, difference_help3, (short)4, 255, THRESH_BINARY_INV);
+	//thresholding(difference_help3, difference_help3, (short)4, 255, THRESH_BINARY_INV);
 	return difference_help2;
 }
 
@@ -206,13 +206,13 @@ Mat FramesDifference::BoxBlurScenarioDelayedWeightsAreas(Mat minued, Mat young, 
 	absdiff(minued, young, difference_helper);
 	difference_help=WeightsMatrixFourth(difference_helper, first, young, yDist, xDist, piksOnYDist, piksOnXDist, firstTimeOfLive);
 	boxFilter(difference_help, difference_help2, -1, Size(21, 21), Point(-1,-1), true, BORDER_DEFAULT );
-	thresholding(difference_help2, difference_help2, (short)4, 255, THRESH_BINARY);
+	thresholding(difference_help2, difference_help2, (short)2, 255, THRESH_BINARY);
 	//young.copyTo(difference_help2); //to see rectangles on real video, you can comment it
-	difference_help3=selectHighestArea(difference_help2, Weights, yDist, xDist, piksOnYDist, piksOnXDist);
+	//difference_help3=selectHighestArea(difference_help2, Weights, yDist, xDist, piksOnYDist, piksOnXDist);
 	//to print weights on real video, you can commit it
 	//difference_help3=printWeights(difference_help2, Weights, yDist, xDist, piksOnYDist, piksOnXDist);
-	thresholding(difference_help3, difference_help3, (short)4, 255, THRESH_BINARY_INV);
-	return difference_help3;
+	//thresholding(difference_help3, difference_help3, (short)4, 255, THRESH_BINARY_INV);
+	return difference_help2;
 }
 
 Mat FramesDifference::GaussBlurScenarioDelayedWeightsEachPix(Mat minued, Mat young, Mat first, float firstTimeOfLive)

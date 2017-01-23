@@ -252,18 +252,18 @@ Mat selectHighestArea (Mat frame, float* weights, short yDist, short xDist, floa
 			}
 		}		
 	}	
-	//rectangle(frame, Point(xMax*piksOnXDist, yMax*piksOnYDist), Point((xMax+1)*piksOnXDist, (yMax+1)*piksOnYDist), Scalar(255, 0, 0), 3, 8, 0);
+	rectangle(frame, Point(xMax*piksOnXDist, yMax*piksOnYDist), Point((xMax+1)*piksOnXDist, (yMax+1)*piksOnYDist), Scalar(255, 0, 0), 3, 8, 0);
 	for (int i=0; i<yDist; i++)
 	{
 		for (int j=0; j<xDist; j++)
 		{
-			//if (weights[i*xDist+j]>(0.7*max))
+			if (weights[i*xDist+j]>(0.7*max))
 			{
-					//rectangle(frame, Point(j*piksOnXDist, i*piksOnYDist), Point((j+1)*piksOnXDist, (i+1)*piksOnYDist), Scalar(255, 0, 0), 2, 8, 0);
+					rectangle(frame, Point(j*piksOnXDist, i*piksOnYDist), Point((j+1)*piksOnXDist, (i+1)*piksOnYDist), Scalar(255, 0, 0), 2, 8, 0);
 			}
-			//else
+			else
 			{
-				//if (weights[i*xDist+j]>(0.6*max))
+				if (weights[i*xDist+j]>(0.6*max))
 				{
 					rectangle(frame, Point(j*piksOnXDist, i*piksOnYDist), Point((j+1)*piksOnXDist, (i+1)*piksOnYDist), Scalar(255, 0, 0), 1, 8, 0);
 				}
@@ -298,7 +298,7 @@ Mat printWeights (Mat frame, float* weights, short yDist, short xDist, float pik
 		{
 			char str[20]  = "";
 			sprintf(str, "%.2f", weights[i*xDist+j]);
-			putText(frame, str, Point(j*piksOnXDist+2, (i+0.5)*piksOnYDist), FONT_HERSHEY_SIMPLEX, 0.3, Scalar(255, 0, 0), 1, 8, false );
+			putText(frame, str, Point(j*piksOnXDist+2, (i+0.7)*piksOnYDist), FONT_HERSHEY_SIMPLEX, 0.3, Scalar(255, 0, 0), 1, 2, false );
 			if (weights[i*xDist+j]>(0.55*max))
 			{
 					rectangle(frame, Point(j*piksOnXDist, i*piksOnYDist), Point((j+1)*piksOnXDist, (i+1)*piksOnYDist), Scalar(255, 0, 0), 2, 8, 0);
